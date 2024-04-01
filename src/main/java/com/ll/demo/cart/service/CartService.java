@@ -32,9 +32,12 @@ public class CartService {
         return cartItem;
     }
 
-    public void removeItem(Member buyer, Article article) {
-        cartItemRepository.deleteByBuyerAndArticle(buyer,article);
+    public int removeItem(Member buyer, Article article) {
+        List<CartItem> cartItems = cartItemRepository.findCartItemByArticleAndBuyer(article,buyer);
+        cartItemRepository.deleteAll(cartItems);
+        return cartItems.size();
     }
+
 
     public List<CartItem> findByBuyer(Member buyer) {
         return cartItemRepository.findByBuyer(buyer);

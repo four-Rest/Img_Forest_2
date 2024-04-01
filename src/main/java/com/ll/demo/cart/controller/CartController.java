@@ -26,31 +26,35 @@ public class CartController {
     private final MemberService memberService;
 
     // 장바구니 추가
-    @PostMapping("/add/{id}")
+    @PostMapping("/add/{articleId}")
     @PreAuthorize("isAuthenticated()")
-    public GlobalResponse addArticle(@PathVariable long id, Principal principal) {
+    public GlobalResponse addArticle(@PathVariable("articleId") long articleId, Principal principal) {
 
-        Article article = articleService.findById(id);
+        Article article = articleService.findById(articleId);
 
         Member member = memberService.findByUsername(principal.getName());
-        cartService.addItem(member,article);
 
-        List<CartItem> cartItems = cartService.findByBuyer(member);
-        return GlobalResponse.of("200","장바구니 담기 성공",cartItems);
+        if(cartService.canAdd(member,article)) {
+            cartService.addItem(member,article);
+            return GlobalResponse.of("200","장바구니 담기 성공");
+        }
+        else {
+            return GlobalResponse.of("400","이미 장바구니에 존재하는 상품입니다.");
+        }
     }
 
     // 장바구니 삭제
-    @DeleteMapping("/remove/{id}")
+    @PostMapping("/remove/{articleId}")
     @PreAuthorize("isAuthenticated()")
-    public GlobalResponse remove(@PathVariable long id, Principal principal) {
+    public GlobalResponse remove(@PathVariable("articleId") long articleId, Principal principal) {
 
-        Article article = articleService.findById(id);
+        Article article = articleService.findById(articleId);
 
         Member member = memberService.findByUsername(principal.getName());
 
-        cartService.removeItem(member,article);
-        List<CartItem> cartItems = cartService.findByBuyer(member);
-        return GlobalResponse.of("200","장바구니 삭제 성공",cartItems);
+        int result = cartService.removeItem(member,article);
+        // List<CartItem> cartItems = cartService.findByBuyer(member);
+        return GlobalResponse.of("200","장바구니 삭제 성공",result);
     }
 
     // 장바구니 리스트

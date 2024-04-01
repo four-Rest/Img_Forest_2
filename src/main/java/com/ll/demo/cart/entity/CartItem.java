@@ -17,9 +17,10 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @ToString(callSuper = true)
 public class CartItem extends BaseEntity {
+
+
     @ManyToOne
     private Member buyer;
-
     @ManyToOne
     private Article article;
 }
