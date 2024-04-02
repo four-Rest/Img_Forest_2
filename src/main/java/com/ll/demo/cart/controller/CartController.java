@@ -52,9 +52,10 @@ public class CartController {
 
         Member member = memberService.findByUsername(principal.getName());
 
-        int result = cartService.removeItem(member,article);
+         cartService.removeItem(member,article);
+
         // List<CartItem> cartItems = cartService.findByBuyer(member);
-        return GlobalResponse.of("200","장바구니 삭제 성공",result);
+        return GlobalResponse.of("200","장바구니 삭제 성공");
     }
 
     // 장바구니 리스트

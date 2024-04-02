@@ -32,10 +32,12 @@ public class CartService {
         return cartItem;
     }
 
-    public int removeItem(Member buyer, Article article) {
-        List<CartItem> cartItems = cartItemRepository.findCartItemByArticleAndBuyer(article,buyer);
-        cartItemRepository.deleteAll(cartItems);
-        return cartItems.size();
+    @Transactional
+    public void removeItem(Member buyer, Article article) {
+        CartItem cartItem = cartItemRepository.findCartItemByArticleAndBuyer(article,buyer);
+        if(cartItem != null) {
+            cartItemRepository.deleteById(cartItem.getId());
+        }
     }
 
 

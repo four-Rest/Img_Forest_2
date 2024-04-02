@@ -16,7 +16,6 @@ public interface CartItemRepository extends JpaRepository<CartItem,Long> {
 
     boolean existsByBuyerAndArticle(Member buyer, Article article);
 
-    void deleteByBuyerAndArticle(Member buyer, Article article);
+    CartItem findCartItemByArticleAndBuyer(Article article, Member member);
 
-    List<CartItem> findCartItemByArticleAndBuyer(Article article, Member buyer);
 }
