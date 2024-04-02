@@ -47,7 +47,7 @@ public class OrderController {
     // 주문 상세
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
-    public GlobalResponse showDetail(@PathVariable long id, Principal principal) {
+    public GlobalResponse showDetail(@PathVariable("id") long id, Principal principal) {
        Order order = orderService.findById(id).orElse(null);
 
        if (order == null) {
@@ -156,7 +156,7 @@ public class OrderController {
 
     @PostMapping("/{id}/payByCash")
     @PreAuthorize("isAuthenticated()")
-    public GlobalResponse payByCash(@PathVariable long id) {
+    public GlobalResponse payByCash(@PathVariable("id") long id) {
         Order order = orderService.findById(id).orElse(null);
 
         if(order == null) {
@@ -174,7 +174,7 @@ public class OrderController {
 
     @DeleteMapping("/{id}/cancel")
     @PreAuthorize("isAuthenticated()")
-    public GlobalResponse cancelOrder(@PathVariable long id, Principal principal) {
+    public GlobalResponse cancelOrder(@PathVariable("id") long id, Principal principal) {
         Order order = orderService.findById(id).orElse(null);
 
         if(order == null) {
@@ -204,15 +204,12 @@ public class OrderController {
     // 단견결제
     @PostMapping("/directMakeOrder/{articleId}")
     @PreAuthorize("isAuthenticated()")
-    public GlobalResponse directMakeOrder(@PathVariable long articleId, Principal principal) {
+    public GlobalResponse directMakeOrder(@PathVariable("articleId") long articleId, Principal principal) {
 
         Article article = articleService.findById(articleId);
         Member member = memberService.findByUsername(principal.getName());
-
-
-
         Order order = orderService.createFromArticle(member,article);
 
-        return GlobalResponse.of("200","단건주문이 완료되었습니다.",order);
+        return GlobalResponse.of("200","단건주문이 완료되었습니다.",order.getId());
     }
 }

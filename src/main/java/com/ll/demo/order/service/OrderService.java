@@ -25,14 +25,16 @@ public class OrderService {
     private final CartService cartService;
     private final MemberService memberService;
 
+
+    // 기존에 구매한 article이면 구매 불가하게 만들기
     @Transactional
     public Order createFromCart(Member buyer) {
         List<CartItem> cartItems = cartService.findByBuyerOrderByIdDesc(buyer);
 
+
         Order order = Order.builder()
                 .buyer(buyer)
                 .build();
-
         // 카트에 아이템을 주문에 담고, 카트 아이템 삭제
         cartItems.stream()
                 .forEach(order::addItem);
@@ -172,11 +174,21 @@ public class OrderService {
     }
 
     public Order createFromArticle(Member buyer, Article article) {
-        Order order = Order.builder()
-                .buyer(buyer)
-                .build();
-        order.addItem(article);
-        orderRepository.save(order);
-        return order;
+        try {
+            Order order = Order.builder()
+                    .buyer(buyer)
+                    .article(article)
+                    .build();
+
+            if(orderRepository.existsByBuyerAndArticle(buyer,article)) {
+                throw new RuntimeException("이미 구매한 이미지입니다.");
+            }
+            order.addItem(article);
+            orderRepository.save(order);
+            return order;
+        } catch (RuntimeException e) {
+            // 이미 구매한 상품인 경우 예외 처리
+            throw new RuntimeException("이미 구매한 상품입니다.", e);
+        }
     }
 }
