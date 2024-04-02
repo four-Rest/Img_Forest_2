@@ -10,5 +10,5 @@ import java.util.List;
 @Setter
 public class CartDto {
     private long totalPrice;
-    private List<CartItem> cartItems;
+    private List<Long> articleIds;
 }

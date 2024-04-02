@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -74,8 +75,13 @@ public class CartController {
 
         CartDto cartDto = new CartDto();
 
-        cartDto.setCartItems(cartItems);
+        List<Long> articleIds = cartItems.
+                stream()
+                        .map(cartItem -> {
+                            return cartItem.getArticle().getId();
+                        }).collect(Collectors.toList());
         cartDto.setTotalPrice(totalPrice);
+        cartDto.setArticleIds(articleIds);
         return GlobalResponse.of("200","장바구니 조회 성공",cartDto);
     }
 }
