@@ -26,6 +26,8 @@ public class WithdrawApply extends BaseTime {
     private String bankName;
     private String bankAccountNo;
     private long cash;
-
+    public boolean isWithdrawDone() {
+        return withdrawDate != null;
+    }
 
 }

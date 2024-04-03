@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,9 +34,27 @@ public class WithdrawService {
         withdrawApplyRepository.save(apply);
     }
 
-
     public List<WithdrawApply> findByApplicant(Member applicant) {
         return withdrawApplyRepository.findByApplicantOrderByIdDesc(applicant);
+    }
+
+    public Optional<WithdrawApply> findById(long id) {
+        return withdrawApplyRepository.findById(id);
+    }
+
+    public boolean canDelete(Member actor, WithdrawApply withdrawApply) {
+        if(actor.isAdmin()) return true;
+
+        if(!withdrawApply.getApplicant().equals(actor)) return false;
+
+        if(withdrawApply.isWithdrawDone()) return false;
+
+        return true;
+    }
+
+    @Transactional
+    public void delete(WithdrawApply withdrawApply) {
+        withdrawApplyRepository.delete(withdrawApply);
     }
 
 }

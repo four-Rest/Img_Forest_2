@@ -10,10 +10,7 @@ import com.ll.demo.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -27,6 +24,8 @@ public class WithdrawController {
     private final WithdrawService withdrawService;
     private final MemberService memberService;
 
+
+    // 출금신청조회
     @GetMapping("/applyList")
     @PreAuthorize("isAuthenticated()")
     public GlobalResponse showApplyList(Principal principal) {
@@ -35,6 +34,7 @@ public class WithdrawController {
         return GlobalResponse.of("200","조회 성공",withdrawApplies);
     }
 
+    // 출금신청
     @PostMapping("/apply")
     @PreAuthorize("isAuthenticated()")
     public GlobalResponse apply(Principal principal, ApplyRequestDto applyRequestDto) {
@@ -43,9 +43,24 @@ public class WithdrawController {
         if(!withdrawService.canApply(applicant, applyRequestDto.getCash())) {
             throw new RuntimeException("출금 신청이 불가합니다.");
         }
-        
+
         withdrawService.apply(applicant,applyRequestDto);
 
         return GlobalResponse.of("200","출금신청이 완료되었습니다.");
+    }
+
+    // 출금신청취소
+    @PostMapping("/{id}/delete")
+    @PreAuthorize("isAuthenticated()")
+    public GlobalResponse delete(@PathVariable("id") long id,  Principal principal){
+        Member member = memberService.findByUsername(principal.getName());
+        WithdrawApply withdrawApply = withdrawService.findById(id).orElseThrow(() -> new IllegalArgumentException(" 출금 신청이 존재하지 않습니다."));
+
+        if(!withdrawService.canDelete(member,withdrawApply)) {
+            throw new RuntimeException("출금 신청 취소가 불가합니다.");
+        }
+        withdrawService.delete(withdrawApply);
+
+        return GlobalResponse.of("200","출금 신청 취소가 완료되었습니다.");
     }
 }
