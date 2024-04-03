@@ -61,7 +61,7 @@ public class OrderController {
            throw new IllegalArgumentException("권한이 없습니다");
        }
 
-       return GlobalResponse.of("200","success",order);
+       return GlobalResponse.of("200","success",order.getId());
     }
 
 
@@ -154,6 +154,8 @@ public class OrderController {
         return GlobalResponse.of("200","주문 정보 리스트 반환",orderPage);
     }
 
+
+    // 캐쉬로만 결제
     @PostMapping("/{id}/payByCash")
     @PreAuthorize("isAuthenticated()")
     public GlobalResponse payByCash(@PathVariable("id") long id) {
@@ -172,7 +174,8 @@ public class OrderController {
         return GlobalResponse.of("200","캐쉬로만 결제 완료");
     }
 
-    @DeleteMapping("/{id}/cancel")
+    // 주문 취소
+    @PostMapping("/{id}/cancel")
     @PreAuthorize("isAuthenticated()")
     public GlobalResponse cancelOrder(@PathVariable("id") long id, Principal principal) {
         Order order = orderService.findById(id).orElse(null);
