@@ -57,4 +57,8 @@ public class WithdrawService {
         withdrawApplyRepository.delete(withdrawApply);
     }
 
+
+    public List<WithdrawApply> findAll() {
+        return withdrawApplyRepository.findAllByOrderByIdDesc();
+    }
 }
