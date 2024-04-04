@@ -42,4 +42,21 @@ public class AdmWithdrawController {
         withdrawService.delete(withdrawApply);
         return GlobalResponse.of("200","해당 출금 신청이 삭제되었습니다.");
     }
+
+    @PostMapping("/{id}/do")
+    @PreAuthorize("isAuthenticated()")
+    public GlobalResponse withdraw(@PathVariable("id") long id, Principal principal) {
+        Member member = memberService.findByUsername(principal.getName());
+        WithdrawApply withdrawApply = withdrawService.findById(id).orElseThrow(() -> new IllegalArgumentException("출금신청이 존재하지 않습니다."));
+
+        if(!withdrawService.canWithdraw(member,withdrawApply)) {
+            throw new RuntimeException("출금신청을 취소할 수 없습니다.");
+        }
+        withdrawService.withdraw(withdrawApply);
+        return GlobalResponse.of("200","출금 처리가 완료되었습니다.");
+    }
+
+
+
+
 }
