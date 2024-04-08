@@ -52,13 +52,13 @@ public class ArticleController {
     private final ImageService imageService;
     private final Rq rq;
 
-    //전체 글 조회
-    @GetMapping("")
-    @Operation(summary = "전체 글 조회", description = "전체 글 조회 시 사용하는 API")
-    public GlobalResponse findAllArticles() {
-        List<ArticleListResponseDto> articleListResponseDtoList = articleService.findAllOrderByLikesDesc();
-        return GlobalResponse.of("200", "success", articleListResponseDtoList);
-    }
+//    //전체 글 조회
+//    @GetMapping("")
+//    @Operation(summary = "전체 글 조회", description = "전체 글 조회 시 사용하는 API")
+//    public GlobalResponse findAllArticles() {
+//        List<ArticleListResponseDto> articleListResponseDtoList = articleService.findAllOrderByLikesDesc();
+//        return GlobalResponse.of("200", "success", articleListResponseDtoList);
+//    }
 
     //단일 글 조회
     @GetMapping("/detail/{id}")
@@ -228,10 +228,10 @@ public class ArticleController {
         return GlobalResponse.of("200", "추천취소되었습니다.");
     }
 
-    // 게시물 페이징
+    // 전체 글 조회(페이징)
     // tag 페이징 return도 추가
     // GlobalResponse에  ArticlePageResponse 담아서 보내주기
-    @GetMapping("/page")
+    @GetMapping("")
     @Operation(summary = "게시물 페이징", description = "게시물 페이징 시 사용하는 API")
     public GlobalResponse readAllPaging(
             @RequestParam(value = "pageNo", defaultValue = "0") int pageNo,
