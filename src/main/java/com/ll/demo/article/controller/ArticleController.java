@@ -283,4 +283,16 @@ public class ArticleController {
             return GlobalResponse.of("200", "saved", articleDetailResponseDto);
         }
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/liked")
+    @Operation(summary = "내가 추천한 게시물 목록", description = "내가 추천한 게시물 목록을 paging객체로 반환하는 API")
+    public GlobalResponse showLikedArticles(
+            @RequestParam(value = "pageNo", defaultValue = "0") int pageNo,
+            Principal principal
+    ) {
+        Member member = memberService.findByUsername(principal.getName());
+        Page<ArticleListResponseDto> likedArticlesPage = articleService.getLikedPaging(member, pageNo);
+        return GlobalResponse.of("200", "success", likedArticlesPage);
+    }
 }
