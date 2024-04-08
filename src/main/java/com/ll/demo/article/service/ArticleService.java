@@ -226,5 +226,9 @@ public class ArticleService {
         }
         return null; // 변환할 수 없으면 null 반환
     }
+    public Article findById(long id) {
+        Article article = articleRepository.findById(id).orElseThrow(()->new RuntimeException("존재하지 않는 게시물입니다."));
+        return article;
+    }
 
 }

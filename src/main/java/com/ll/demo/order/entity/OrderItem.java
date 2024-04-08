@@ -1,5 +1,6 @@
 package com.ll.demo.order.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ll.demo.article.entity.Article;
 import com.ll.demo.global.entity.BaseEntity;
 import jakarta.persistence.Entity;
@@ -15,8 +16,12 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @ToString(callSuper = true)
 public class OrderItem extends BaseEntity {
+
+    @JsonIgnore
     @ManyToOne
     private Order order;
+
+    @JsonIgnore
     @ManyToOne
     private Article article;
 

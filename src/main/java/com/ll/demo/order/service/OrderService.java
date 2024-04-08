@@ -1,5 +1,8 @@
 package com.ll.demo.order.service;
 
+import com.ll.demo.article.entity.Article;
+import com.ll.demo.article.entity.PurchasedArticle;
+import com.ll.demo.article.service.PurchasedArticleService;
 import com.ll.demo.cart.entity.CartItem;
 import com.ll.demo.cart.service.CartService;
 import com.ll.demo.cash.entity.CashLog;
@@ -23,15 +26,18 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CartService cartService;
     private final MemberService memberService;
+    private final PurchasedArticleService purchasedArticleService;
 
+
+    // 기존에 구매한 article이면 구매 불가하게 만들기
     @Transactional
     public Order createFromCart(Member buyer) {
-        List<CartItem> cartItems = cartService.findItemsByBuyer(buyer);
+        List<CartItem> cartItems = cartService.findByBuyerOrderByIdDesc(buyer);
+
 
         Order order = Order.builder()
                 .buyer(buyer)
                 .build();
-
         // 카트에 아이템을 주문에 담고, 카트 아이템 삭제
         cartItems.stream()
                 .forEach(order::addItem);
@@ -56,6 +62,13 @@ public class OrderService {
     }
     private void payDone(Order order) {
         order.setPaymentDone();
+
+        order.getOrderItems()
+                .stream()
+                .forEach(orderItem -> {
+                    Article article = orderItem.getArticle();
+                    purchasedArticleService.add(order.getBuyer(),article);
+                });
     }
 
     @Transactional
@@ -63,9 +76,14 @@ public class OrderService {
         long payPrice = order.calcPayPrice();
 
         memberService.addCash(order.getBuyer(), payPrice, CashLog.EvenType.환불__예치금_주문결제);
-
-        order.setCancelDone();
         order.setRefundDone();
+
+        order.getOrderItems()
+                .stream()
+                .forEach(orderItem -> {
+                    Article article = orderItem.getArticle();
+                    purchasedArticleService.delete(order.getBuyer(), article);
+                });
     }
 
     // 주문과 금액이 일치하지 않으면 예외처리
@@ -168,5 +186,24 @@ public class OrderService {
 
     public boolean canCancel(Member buyer, Order order) {
         return buyer.equals(order.getBuyer()) && order.isCancelable();
+    }
+
+    public Order createFromArticle(Member buyer, Article article) {
+        try {
+            Order order = Order.builder()
+                    .buyer(buyer)
+                    .article(article)
+                    .build();
+
+            if(orderRepository.existsByBuyerAndArticle(buyer,article)) {
+                throw new RuntimeException("이미 구매한 이미지입니다.");
+            }
+            order.addItem(article);
+            orderRepository.save(order);
+            return order;
+        } catch (RuntimeException e) {
+            // 이미 구매한 상품인 경우 예외 처리
+            throw new RuntimeException("이미 구매한 상품입니다.", e);
+        }
     }
 }

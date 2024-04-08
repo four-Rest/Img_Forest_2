@@ -1,6 +1,8 @@
 package com.ll.demo.order.controller;
 
 
+import com.ll.demo.article.entity.Article;
+import com.ll.demo.article.service.ArticleService;
 import com.ll.demo.global.response.GlobalResponse;
 import com.ll.demo.member.entity.Member;
 import com.ll.demo.member.service.MemberService;
@@ -37,6 +39,7 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
     private final MemberService memberService;
+    private final ArticleService articleService;
 
     @Value("${custom.tossPayments.widget.secretKey")
     private String tossApiKey;
@@ -44,7 +47,7 @@ public class OrderController {
     // 주문 상세
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
-    public GlobalResponse showDetail(@PathVariable long id, Principal principal) {
+    public GlobalResponse showDetail(@PathVariable("id") long id, Principal principal) {
        Order order = orderService.findById(id).orElse(null);
 
        if (order == null) {
@@ -58,7 +61,7 @@ public class OrderController {
            throw new IllegalArgumentException("권한이 없습니다");
        }
 
-       return GlobalResponse.of("200","success",order);
+       return GlobalResponse.of("200","success",order.getId());
     }
 
 
@@ -151,9 +154,11 @@ public class OrderController {
         return GlobalResponse.of("200","주문 정보 리스트 반환",orderPage);
     }
 
+
+    // 캐쉬로만 결제
     @PostMapping("/{id}/payByCash")
     @PreAuthorize("isAuthenticated()")
-    public GlobalResponse payByCash(@PathVariable long id) {
+    public GlobalResponse payByCash(@PathVariable("id") long id) {
         Order order = orderService.findById(id).orElse(null);
 
         if(order == null) {
@@ -169,9 +174,10 @@ public class OrderController {
         return GlobalResponse.of("200","캐쉬로만 결제 완료");
     }
 
-    @DeleteMapping("/{id}/cancel")
+    // 주문 취소
+    @PostMapping("/{id}/cancel")
     @PreAuthorize("isAuthenticated()")
-    public GlobalResponse cancelOrder(@PathVariable long id, Principal principal) {
+    public GlobalResponse cancelOrder(@PathVariable("id") long id, Principal principal) {
         Order order = orderService.findById(id).orElse(null);
 
         if(order == null) {
@@ -187,5 +193,26 @@ public class OrderController {
         orderService.cancel(order);
 
         return GlobalResponse.of("200","주문취소가 완료되었습니다.");
+    }
+
+    // 장바구니로 주문
+    @PostMapping("/createFromCart")
+    @PreAuthorize("isAuthenticated()")
+    public GlobalResponse createFromCart(Principal principal) {
+        Member member = memberService.findByUsername(principal.getName());
+        Order order = orderService.createFromCart(member);
+        return GlobalResponse.of("200","장바구니 주문이 완료되었습니다.");
+    }
+
+    // 단견결제
+    @PostMapping("/directMakeOrder/{articleId}")
+    @PreAuthorize("isAuthenticated()")
+    public GlobalResponse directMakeOrder(@PathVariable("articleId") long articleId, Principal principal) {
+
+        Article article = articleService.findById(articleId);
+        Member member = memberService.findByUsername(principal.getName());
+        Order order = orderService.createFromArticle(member,article);
+
+        return GlobalResponse.of("200","단건주문이 완료되었습니다.",order.getId());
     }
 }

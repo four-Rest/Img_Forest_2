@@ -1,4 +1,4 @@
-package com.ll.demo.global.config.jpa;
+package com.ll.demo.global.jpa;
 
 
 import com.querydsl.jpa.impl.JPAQueryFactory;

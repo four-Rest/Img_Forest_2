@@ -32,11 +32,40 @@ public class CartService {
         return cartItem;
     }
 
-    public List<CartItem> findItemsByBuyer(Member buyer) {
+    @Transactional
+    public void removeItem(Member buyer, Article article) {
+        CartItem cartItem = cartItemRepository.findCartItemByArticleAndBuyer(article,buyer);
+        if(cartItem != null) {
+            cartItemRepository.deleteById(cartItem.getId());
+        }
+    }
+
+
+    public List<CartItem> findByBuyer(Member buyer) {
         return cartItemRepository.findByBuyer(buyer);
     }
 
     public void delete(CartItem cartItem) {
         cartItemRepository.delete(cartItem);
+    }
+
+    public boolean canAdd(Member buyer,Article article){
+        if(buyer == null) {
+            return false;
+        }
+        return !cartItemRepository.existsByBuyerAndArticle(buyer, article);
+    }
+    public boolean canRemove(Member buyer, Article article) {
+        if (buyer == null) return false;
+
+        return cartItemRepository.existsByBuyerAndArticle(buyer, article);
+    }
+
+    public List<CartItem> findByBuyerOrderByIdDesc(Member buyer) {
+        return cartItemRepository.findByBuyer(buyer);
+    }
+
+    public boolean canDirectMakeOrder(Member buyer,Article article) {
+        return canAdd(buyer,article);
     }
 }

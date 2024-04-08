@@ -91,6 +91,10 @@ dependencies {
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 }
 
+compileJava {
+    options.compilerArgs << "-parameters"
+}
+
 tasks.named('test') {
     useJUnitPlatform()
 }

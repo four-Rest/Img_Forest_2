@@ -1,11 +1,10 @@
-package com.ll.demo.cart.entity;
+package com.ll.demo.article.entity;
 
-import com.ll.demo.article.entity.Article;
-import com.ll.demo.global.entity.BaseEntity;
+
+import com.ll.demo.global.jpa.BaseTime;
 import com.ll.demo.member.entity.Member;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -16,11 +15,11 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @Getter
 @ToString(callSuper = true)
-public class CartItem extends BaseEntity {
-
-
+public class PurchasedArticle extends BaseTime {
     @ManyToOne
-    private Member buyer;
+    private Member owner;
+
     @ManyToOne
     private Article article;
+
 }

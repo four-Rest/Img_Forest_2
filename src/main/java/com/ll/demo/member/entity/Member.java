@@ -48,6 +48,10 @@ public class Member extends BaseEntity {
     }
 
 
+    public boolean isAdmin() {
+        return getAuthoritiesAsStrList().contains(UserRole.ADMIN.getValue());
+    }
+
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<MyArticle> myArticles = new ArrayList<>();

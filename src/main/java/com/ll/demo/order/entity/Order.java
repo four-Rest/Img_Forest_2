@@ -1,12 +1,13 @@
 package com.ll.demo.order.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ll.demo.article.entity.Article;
 import com.ll.demo.cart.entity.CartItem;
 import com.ll.demo.global.entity.BaseEntity;
 import com.ll.demo.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import net.bytebuddy.implementation.bind.annotation.Super;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -22,9 +23,14 @@ import java.util.List;
 @ToString(callSuper = true)
 @Table(name = "order_")
 public class Order extends BaseEntity {
+
+    @JsonIgnore
     @ManyToOne
     private Member buyer;
 
+    @JsonIgnore
+    @ManyToOne
+    private Article article;
 
     // 주문은 하나, 주문에 포함된 하나하나의 상품들을 orderItem
     @Builder.Default
@@ -35,15 +41,30 @@ public class Order extends BaseEntity {
     private LocalDateTime cancelDate; // 취소일
     private LocalDateTime refundDate; // 환불일
 
+    public LocalDateTime setPayDate() {
+        return payDate != null ? payDate : LocalDateTime.now(); // 기본값으로 현재 시간을 반환하도록 처리
+    }
+
+    public LocalDateTime setCancelDate() {
+        return cancelDate != null ? cancelDate : LocalDateTime.now();
+    }
+
+    public LocalDateTime setRefundDate() {
+        return refundDate != null ? refundDate: LocalDateTime.now();
+    }
 
     public void addItem(CartItem cartItem) {
+       addItem(cartItem.getArticle());
+    }
 
-        if(buyer.hasArticle(cartItem.getArticle())) {
-            throw new IllegalArgumentException("이미 구매한 이미지입니다.");
+    public void addItem(Article article) {
+
+        if(buyer.hasArticle(article)) {
+            throw new RuntimeException("이미 구매한 이미지입니다.");
         }
         OrderItem orderItem = OrderItem.builder()
                 .order(this)
-                .article(cartItem.getArticle())
+                .article(article)
                 .build();
 
         orderItems.add(orderItem);
