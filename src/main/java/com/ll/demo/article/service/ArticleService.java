@@ -231,4 +231,15 @@ public class ArticleService {
         return article;
     }
 
+    public Page<ArticleListResponseDto> getLikedPaging(Member member, int pageNo) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("id"));
+        Pageable pageable = PageRequest.of(pageNo,10,Sort.by(sorts));
+
+        if (member == null) {
+            throw new IllegalArgumentException("회원을 찾을 수 없습니다");
+        }
+
+        return likeTableRepository.getLikeTableByMemberId(member.getId(), pageable).map(likeTable -> new ArticleListResponseDto(findById(likeTable.getArticleId())));
+    }
 }
