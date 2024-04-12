@@ -179,8 +179,12 @@ public class MemberController {
             }
             Map<String, Object> data = (Map<String, Object>) claims.get("data");
             String username = (String) data.get("username");
+            System.out.println("kakaoLogin == " + data.get("kakaoLogin"));
             Member member = memberService.findByUsername(username);
-            return GlobalResponse.of("200", "로그인 성공.", new LoginResponseDto(member));
+            if(data.get("kakaoLogin").equals("true")){
+                return GlobalResponse.of("200", "로그인 성공.", new LoginResponseDto(member, (String) data.get("kakaoLogin")));
+            }
+            else return GlobalResponse.of("200", "로그인 성공.", new LoginResponseDto(member));
         } catch (Exception e) {
             // 다른 예외들 (토큰 만료, 지원하지 않는 JWT 등)
             System.err.println("Token validation error: " + e.getMessage());
