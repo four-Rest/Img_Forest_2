@@ -3,6 +3,7 @@ package com.ll.demo.order.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ll.demo.article.entity.Article;
 import com.ll.demo.cart.entity.CartItem;
+import com.ll.demo.global.app.AppConfig;
 import com.ll.demo.global.entity.BaseEntity;
 import com.ll.demo.member.entity.Member;
 import jakarta.persistence.*;
@@ -65,6 +66,7 @@ public class Order extends BaseEntity {
         OrderItem orderItem = OrderItem.builder()
                 .order(this)
                 .article(article)
+                .rebateRate(AppConfig.getRebateRate())
                 .build();
 
         orderItems.add(orderItem);
@@ -156,7 +158,7 @@ public class Order extends BaseEntity {
         if (cancelDate != null) return false;
 
         // 결제일자로부터 1시간 지나면 취소 불가능
-        if (payDate != null && payDate.plusHours(1).isBefore(LocalDateTime.now())) return false;
+        if (payDate != null && payDate.plusSeconds(AppConfig.getOrderCancelableSeconds()).isBefore(LocalDateTime.now())) return false;
 
         return true;
     }

@@ -37,6 +37,8 @@ public class QOrderItem extends EntityPathBase<OrderItem> {
 
     public final QOrder order;
 
+    public final NumberPath<Double> rebateRate = createNumber("rebateRate", Double.class);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> removedTime = _super.removedTime;
 

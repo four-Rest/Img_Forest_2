@@ -25,6 +25,8 @@ public class OrderItem extends BaseEntity {
     @ManyToOne
     private Article article;
 
+    private double rebateRate;
+
     public long getPayPrice() {
         return article.getPrice();
     }

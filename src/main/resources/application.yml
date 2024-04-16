@@ -53,6 +53,10 @@ logging:
     org.springframework.transaction.interceptor: TRACE
 
 custom:
+  rebate:
+    rate: 0.7
+  order:
+    cancelableSeconds: 3600
   dev:
     cookieDomain: localhost
     frontUrl: "http://${custom.dev.cookieDomain}:3000"

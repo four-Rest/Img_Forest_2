@@ -159,13 +159,6 @@ public class OrderService {
     }
 
 
-    public void payDone(String code) {
-        Order order = findByCode(code).orElse(null);
-        if (order == null)
-            throw new IllegalArgumentException("존재하지 않는 주문입니다.");
-        payDone(order);
-    }
-
     public Page<Order> search(Member buyer, Boolean payStatus, Boolean cancelStatus, Boolean refundStatus, Pageable pageable) {
 
         return orderRepository.search(buyer,payStatus,cancelStatus,refundStatus,pageable);

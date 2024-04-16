@@ -96,4 +96,30 @@ public class AppConfig {
 
     @Getter
     public static int basePageSize = 10;
+
+
+    @Getter
+    private static String tossPaymentsWidgetSecretKey;
+
+    @Value("${custom.tossPayments.widget.secretKey}")
+    public void setTossPaymentsWidgetSecretKey(String tossPaymentsWidgetSecretKey) {
+        this.tossPaymentsWidgetSecretKey = tossPaymentsWidgetSecretKey;
+    }
+
+
+    @Getter
+    private static int orderCancelableSeconds;
+
+    @Value("${custom.order.cancelableSeconds}")
+    public void setOrderCancelableSeconds(int orderCancelableSeconds) {
+        this.orderCancelableSeconds = orderCancelableSeconds;
+    }
+
+    @Getter
+    private static double rebateRate;
+
+    @Value("${custom.rebate.rate}")
+    public void setRebateRate(double rebateRate) {
+        this.rebateRate = rebateRate;
+    }
 }
