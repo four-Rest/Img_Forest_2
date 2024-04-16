@@ -67,6 +67,7 @@ public class Order extends BaseEntity {
                 .order(this)
                 .article(article)
                 .rebateRate(AppConfig.getRebateRate())
+                .payPrice(article.getPrice())
                 .build();
 
         orderItems.add(orderItem);

@@ -25,7 +25,9 @@ public class OrderItem extends BaseEntity {
     @ManyToOne
     private Article article;
 
-    private double rebateRate;
+    private double rebateRate;  // 판매되었을 당시 정산율
+
+    private Long payPrice;  // 판매되었을 당시 가격
 
     public long getPayPrice() {
         return article.getPrice();
