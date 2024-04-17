@@ -9,6 +9,8 @@ import com.ll.demo.cash.entity.CashLog;
 import com.ll.demo.member.entity.Member;
 import com.ll.demo.member.service.MemberService;
 import com.ll.demo.order.entity.Order;
+import com.ll.demo.order.entity.OrderItem;
+import com.ll.demo.order.repository.OrderItemRepository;
 import com.ll.demo.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,6 +29,7 @@ public class OrderService {
     private final CartService cartService;
     private final MemberService memberService;
     private final PurchasedArticleService purchasedArticleService;
+    private final OrderItemRepository orderItemRepository;
 
 
     // 기존에 구매한 article이면 구매 불가하게 만들기
@@ -198,5 +201,9 @@ public class OrderService {
             // 이미 구매한 상품인 경우 예외 처리
             throw new RuntimeException("이미 구매한 상품입니다.", e);
         }
+    }
+
+    public List<OrderItem> findItems() {
+        return orderItemRepository.findAll();
     }
 }
