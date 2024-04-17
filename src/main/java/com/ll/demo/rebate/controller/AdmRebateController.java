@@ -8,24 +8,25 @@ import com.ll.demo.rebate.service.RebateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/adm/rebate")
 @RequiredArgsConstructor
 public class AdmRebateController {
 
-    private OrderService orderService;
-    private RebateService rebateService;
+    private final RebateService rebateService;
 
     @PostMapping("/make")
     @PreAuthorize("isAuthenticated()")
-    public GlobalResponse make() {
-        List<OrderItem> orderItems = orderService.findItems();
-        rebateService.make(orderItems);
+    public GlobalResponse make(@RequestBody Map<String, String> requestBody) {
+        String yearMonth = requestBody.get("yearMonth");
+        rebateService.make(yearMonth);
         return GlobalResponse.of("200","정산 데이터 생성 완료");
     }
 

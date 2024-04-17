@@ -37,7 +37,7 @@ public class Article extends BaseEntity {
 
     private boolean paid;
 
-    private Long price;
+    private long price;
 
     private int likes;
 
