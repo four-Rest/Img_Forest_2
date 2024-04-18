@@ -39,4 +39,13 @@ public class AdmRebateController {
         return GlobalResponse.of("200","정산데이터 리스트 반환 완료",items);
     }
 
+    // 단건 정산
+    @PostMapping("/{id}/rebate")
+    public GlobalResponse rebate(@PathVariable("id") long id) {
+        RebateItem rebateItem = rebateService.findById(id).orElseThrow(() -> new RuntimeException("정산 데이터가 존재하지 않습니다."));
+        rebateService.rebate(rebateItem);
+
+        return GlobalResponse.of("200","%d번 정산 데이터를 처리했습니다.".formatted(rebateItem.getId()));
+    }
+
 }

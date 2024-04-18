@@ -42,4 +42,12 @@ public class RebateItem extends BaseTime {
     private long rebatePrice; // 정산금액
     private LocalDateTime payDate;
 
+    public boolean isRebateAvailable() {
+        return rebateDate == null;
+    }
+
+    public void setRebateDone() {
+        rebateDate = LocalDateTime.now();
+    }
+
 }
