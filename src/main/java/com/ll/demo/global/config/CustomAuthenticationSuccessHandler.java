@@ -39,6 +39,8 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                     Map.of(
                             "id", member.getId().toString(),
                             "username", member.getUsername(),
+                            "nickname", member.getNickname(),
+                            "kakaoLogin", "true",
                             "authorities", member.getAuthoritiesAsStrList()
                     )
                     , jwtProperties.getSecretKey()
@@ -47,7 +49,8 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                     60 * 60 * 24, //1 day
                     Map.of(
                             "id", member.getId().toString(),
-                            "username", member.getUsername()
+                            "username", member.getUsername(),
+                            "nickname", member.getNickname()
                     )
                     , jwtProperties.getSecretKey()
             );

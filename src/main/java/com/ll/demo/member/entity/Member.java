@@ -26,6 +26,7 @@ public class Member extends BaseEntity {
     @Column(unique = true)
     private String username;
     private String password;
+    @Column(unique = true)
     private String email;
     private String nickname;
     private String refreshToken;
