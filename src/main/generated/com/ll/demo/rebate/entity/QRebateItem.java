@@ -50,6 +50,8 @@ public class QRebateItem extends EntityPathBase<RebateItem> {
 
     public final com.ll.demo.order.entity.QOrderItem orderItem;
 
+    public final DateTimePath<java.time.LocalDateTime> payDate = createDateTime("payDate", java.time.LocalDateTime.class);
+
     public final NumberPath<Long> payPrice = createNumber("payPrice", Long.class);
 
     public final DateTimePath<java.time.LocalDateTime> rebateDate = createDateTime("rebateDate", java.time.LocalDateTime.class);

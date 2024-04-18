@@ -1,6 +1,7 @@
 package com.ll.demo.rebate.service;
 
 
+import com.ll.demo.global.util.Ut;
 import com.ll.demo.order.entity.OrderItem;
 import com.ll.demo.order.service.OrderService;
 import com.ll.demo.rebate.entity.RebateItem;
@@ -38,6 +39,7 @@ public class RebateService {
                 .stream()
                 .forEach(orderItem -> {
                     RebateItem rebateItem = RebateItem.builder()
+                            .payDate(orderItem.getOrder().getPayDate())
                             .eventDate(orderItem.getOrder().getPayDate())
                             .rebateRate(orderItem.getRebateRate())
                             .payPrice(orderItem.getPayPrice())
@@ -50,5 +52,16 @@ public class RebateService {
 
                     rebateItemRepository.save(rebateItem);
                 });
+    }
+
+    public List<RebateItem> findByPayDateIn(String yearMonth) {
+        int monthEndDay = Ut.date.getEndDayOf(yearMonth);
+
+        String fromDateStr = yearMonth + "-01 00:00:00.000000";
+        String toDateStr = yearMonth + "-%02d 23:59:59.999999".formatted(monthEndDay);
+        LocalDateTime fromDate = Ut.date.parse(fromDateStr);
+        LocalDateTime toDate = Ut.date.parse(toDateStr);
+
+        return rebateItemRepository.findByPayDateBetweenOrderByIdAsc(fromDate, toDate);
     }
 }
