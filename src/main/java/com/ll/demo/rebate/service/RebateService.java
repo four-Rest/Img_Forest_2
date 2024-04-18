@@ -34,7 +34,7 @@ public class RebateService {
         LocalDateTime startDate = yearMonth_.atDay(1).atStartOfDay(); // 해당 월의 첫 날 00:00
         LocalDateTime endDate = yearMonth_.atEndOfMonth().atTime(23, 59, 59, 999999999); // 해당 월의 마지막 날 23:59:59.999999999
 
-        List<OrderItem> orderItems = orderService.findNotRefundedByPayDateBetween(startDate, endDate);
+        List<OrderItem> orderItems = orderService.findNotRebatedAndNotRefundedByPayDateBetween(startDate, endDate);
         orderItems
                 .stream()
                 .forEach(orderItem -> {

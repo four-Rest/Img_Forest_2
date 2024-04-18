@@ -39,6 +39,8 @@ public class QOrderItem extends EntityPathBase<OrderItem> {
 
     public final NumberPath<Long> payPrice = createNumber("payPrice", Long.class);
 
+    public final com.ll.demo.rebate.entity.QRebateItem rebateItem;
+
     public final NumberPath<Double> rebateRate = createNumber("rebateRate", Double.class);
 
     //inherited
@@ -64,6 +66,7 @@ public class QOrderItem extends EntityPathBase<OrderItem> {
         super(type, metadata, inits);
         this.article = inits.isInitialized("article") ? new com.ll.demo.article.entity.QArticle(forProperty("article"), inits.get("article")) : null;
         this.order = inits.isInitialized("order") ? new QOrder(forProperty("order"), inits.get("order")) : null;
+        this.rebateItem = inits.isInitialized("rebateItem") ? new com.ll.demo.rebate.entity.QRebateItem(forProperty("rebateItem"), inits.get("rebateItem")) : null;
     }
 
 }

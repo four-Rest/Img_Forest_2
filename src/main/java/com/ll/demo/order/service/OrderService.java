@@ -204,9 +204,10 @@ public class OrderService {
         }
     }
 
-
-    public List<OrderItem> findNotRefundedByPayDateBetween(LocalDateTime startDate, LocalDateTime endDate) {
-        return orderItemRepository.findByOrderPayDateBetweenAndOrderRefundDateOrderByIdDesc(startDate, endDate, null);
+    public List<OrderItem> findNotRebatedAndNotRefundedByPayDateBetween(LocalDateTime startDate, LocalDateTime endDate) {
+        return orderItemRepository.findByOrderPayDateBetweenAndOrderRefundDateAndRebateItemOrderByIdDesc(
+                startDate, endDate, null, null
+        );
     }
 
 }

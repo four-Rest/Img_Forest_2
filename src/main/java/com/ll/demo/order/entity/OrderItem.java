@@ -3,6 +3,7 @@ package com.ll.demo.order.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ll.demo.article.entity.Article;
 import com.ll.demo.global.entity.BaseEntity;
+import com.ll.demo.rebate.entity.RebateItem;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import lombok.*;
@@ -28,6 +29,9 @@ public class OrderItem extends BaseEntity {
     private double rebateRate;  // 판매되었을 당시 정산율
 
     private long payPrice;  // 판매되었을 당시 가격
+
+    @ManyToOne
+    private RebateItem rebateItem;
 
     public long getPayPrice() {
         return article.getPrice();
