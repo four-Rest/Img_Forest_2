@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 public class RebateItem extends BaseTime {
     private LocalDateTime eventDate; // 판매(구매)가 발생한 날짜
     private LocalDateTime rebateDate; // 정산일
-    @OneToOne
+    @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private OrderItem orderItem; // 주문상품
 
