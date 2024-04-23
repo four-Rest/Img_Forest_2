@@ -23,7 +23,7 @@ public class CashLog extends BaseEntity {
     private Long relId;
     @ManyToOne
     private Member member;
-    private long price;
+    private Long price;
 
     public enum EvenType {
         충전__무통장입금,

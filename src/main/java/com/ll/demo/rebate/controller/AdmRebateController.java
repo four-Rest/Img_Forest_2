@@ -4,6 +4,7 @@ package com.ll.demo.rebate.controller;
 import com.ll.demo.global.response.GlobalResponse;
 import com.ll.demo.global.util.Ut;
 import com.ll.demo.rebate.entity.RebateItem;
+import com.ll.demo.rebate.service.RebateBatchService;
 import com.ll.demo.rebate.service.RebateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,12 +19,13 @@ import java.util.Map;
 public class AdmRebateController {
 
     private final RebateService rebateService;
+    private final RebateBatchService rebateBatchService;
 
     @PostMapping("/make")
     @PreAuthorize("isAuthenticated()")
     public GlobalResponse make(@RequestBody Map<String, String> requestBody) {
         String yearMonth = requestBody.get("yearMonth");
-        rebateService.make(yearMonth);
+        rebateBatchService.make(yearMonth);
         return GlobalResponse.of("200","정산 데이터 생성 완료");
     }
 

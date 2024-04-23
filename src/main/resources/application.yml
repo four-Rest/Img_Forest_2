@@ -6,6 +6,11 @@ spring:
     multipart:
       max-file-size: 50MB
       max-request-size: 50MB
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
   jpa:
     hibernate:
       ddl-auto: update

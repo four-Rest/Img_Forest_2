@@ -13,12 +13,6 @@ import java.util.List;
 
 @Repository
 public interface OrderItemRepository extends JpaRepository<OrderItem,Long> {
-    List<OrderItem> findByOrderPayDateBetweenAndOrderRefundDateAndRebateItemOrderByIdDesc(
-            LocalDateTime startDate,
-            LocalDateTime endDate,
-            LocalDateTime refundDate,
-            RebateItem rebateItem
-    );
 
 
     Page<OrderItem> findByOrderPayDateBetweenAndOrderRefundDateAndRebateItem(
