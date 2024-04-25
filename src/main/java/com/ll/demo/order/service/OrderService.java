@@ -9,6 +9,8 @@ import com.ll.demo.cash.entity.CashLog;
 import com.ll.demo.member.entity.Member;
 import com.ll.demo.member.service.MemberService;
 import com.ll.demo.order.entity.Order;
+import com.ll.demo.order.entity.OrderItem;
+import com.ll.demo.order.repository.OrderItemRepository;
 import com.ll.demo.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +30,7 @@ public class OrderService {
     private final CartService cartService;
     private final MemberService memberService;
     private final PurchasedArticleService purchasedArticleService;
+    private final OrderItemRepository orderItemRepository;
 
 
     // 기존에 구매한 article이면 구매 불가하게 만들기
@@ -159,13 +163,6 @@ public class OrderService {
     }
 
 
-    public void payDone(String code) {
-        Order order = findByCode(code).orElse(null);
-        if (order == null)
-            throw new IllegalArgumentException("존재하지 않는 주문입니다.");
-        payDone(order);
-    }
-
     public Page<Order> search(Member buyer, Boolean payStatus, Boolean cancelStatus, Boolean refundStatus, Pageable pageable) {
 
         return orderRepository.search(buyer,payStatus,cancelStatus,refundStatus,pageable);
@@ -206,4 +203,6 @@ public class OrderService {
             throw new RuntimeException("이미 구매한 상품입니다.", e);
         }
     }
+
+
 }
