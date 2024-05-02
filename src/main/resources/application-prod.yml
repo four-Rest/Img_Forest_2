@@ -1,25 +1,37 @@
 server:
   shutdown: graceful
-  port: ${port}
+  port: 8090
 spring:
   servlet:
     multipart:
-      max-file-size: 5MB
-      max-request-size: 5MB
+      max-file-size: 50MB
+      max-request-size: 50MB
   datasource:
-    url: ${database.url}
-    username: ${database.username}
-    password: ${database.password}
+    url: jdbc:mysql://172.17.0.1:3306/imgforest_prod
+    username: userlocal
+    password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
   cloud:
     aws:
-      accessKey: ON_SECRET
-      secretKey: ON_SECRET
+      ${spring.profiles.include}.accessKey: ${cloud.aws.accessKey}
+      ${spring.profiles.include}.secretKey: ${cloud.aws.secretKey}
       regionName: kr-standard
       bucketName: img-forest-image-prod
+  data:
+    redis:
+      host: "172.17.0.1"
+      port: 6379
+  security:
+    oauth2:
+      client:
+        custom:
+          redirectUrlAfterSocialLogin: https://img.for-rest.site/?check-social-login
+        registration:
+          kakao:
+            redirect-uri: '${custom.prod.backUrl}/{action}/oauth2/code/{registrationId}'
 logging:
   level:
     com.ll.medium: INFO
@@ -27,3 +39,8 @@ logging:
     org.hibernate.orm.jdbc.bind: INFO
     org.hibernate.orm.jdbc.extract: INFO
     org.springframework.transaction.interceptor: INFO
+custom:
+  site:
+    cookieDomain: "${custom.prod.cookieDomain}"
+    frontUrl: "${custom.prod.frontUrl}"
+    backUrl: "${custom.prod.backUrl}"

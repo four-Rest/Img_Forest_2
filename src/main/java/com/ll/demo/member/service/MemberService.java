@@ -1,9 +1,6 @@
 package com.ll.demo.member.service;
 
-import com.ll.demo.cash.entity.CashLog;
-import com.ll.demo.cash.service.CashService;
 import com.ll.demo.global.config.JwtProperties;
-import com.ll.demo.global.entity.BaseEntity;
 import com.ll.demo.global.response.GlobalResponse;
 import com.ll.demo.member.dto.*;
 import com.ll.demo.member.entity.Member;
@@ -31,7 +28,6 @@ public class MemberService {
     private final JwtProperties jwtProperties;
     private final EmailRepository emailRepository;
     private final EmailService emailService;
-    private final CashService cashService;
 
     @Transactional
     public GlobalResponse<Member> signup(MemberCreateRequestDto dto) {
@@ -214,15 +210,6 @@ public class MemberService {
     @Scheduled(cron = "0 0 12 * * ?") // 매일 정오에 해당 만료 코드 삭제
     public void deleteExpiredVerificationCodes() {
         emailRepository.deleteByExpiresTimeBefore(LocalDateTime.now());
-    }
-
-
-    @Transactional
-    public void addCash(Member member, long price, CashLog.EvenType eventType) {
-        CashLog cashLog = cashService.addCash(member, price, eventType);
-
-        long newRestCash = member.getRestCash() + cashLog.getPrice();
-        member.setRestCash(newRestCash);
     }
 
 }

@@ -1,5 +1,8 @@
 package com.ll.demo.article.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ll.demo.article.dto.*;
 import com.ll.demo.article.entity.Article;
 import com.ll.demo.article.service.ArticleService;
@@ -14,9 +17,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.ListOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,26 +52,42 @@ public class ArticleController {
     private final ImageService imageService;
     private final Rq rq;
 
-    //전체 글 조회
-    @GetMapping("")
-    @Operation(summary = "전체 글 조회", description = "전체 글 조회 시 사용하는 API")
-    public GlobalResponse findAllArticles() {
-        List<ArticleListResponseDto> articleListResponseDtoList = articleService.findAllOrderByLikesDesc();
-        return GlobalResponse.of("200", "success", articleListResponseDtoList);
-    }
+//    //전체 글 조회
+//    @GetMapping("")
+//    @Operation(summary = "전체 글 조회", description = "전체 글 조회 시 사용하는 API")
+//    public GlobalResponse findAllArticles() {
+//        List<ArticleListResponseDto> articleListResponseDtoList = articleService.findAllOrderByLikesDesc();
+//        return GlobalResponse.of("200", "success", articleListResponseDtoList);
+//    }
 
     //단일 글 조회
     @GetMapping("/detail/{id}")
     @Operation(summary = "단일 글 조회", description = "단일 글 조회 시 사용하는 API")
-    public GlobalResponse showArticle(@PathVariable("id") Long id) {
-
+    public GlobalResponse showArticle(@PathVariable("id") Long id)  {
+        Long memberId = null;
+        if(rq.isLoggedIn()){
+            memberId = memberService.findByUsername(rq.getUser().getUsername()).getId();
+            // 로그인 했고, Redis에서 글을 찾아보기
+            ArticleDetailResponseDto articleDetailResponseDto = articleService.findRecentArticle(memberId, id);
+            if(articleDetailResponseDto != null) {
+                // Redis에서 찾은 글이 있으면, 그 글로 ArticleDetailResponseDto 생성 후 반환
+                articleDetailResponseDto.setLikeValue(
+                        articleService.getLikeByArticleIdAndMemberId(articleDetailResponseDto.getId(), memberId) != null
+                );
+                return GlobalResponse.of("200", "success", articleDetailResponseDto);
+            }
+            else{
+                // Redis에서 찾지 못했으면, DB에서 글을 조회하고 Redis에 저장
+                articleService.saveRecentReadArticle(memberId, id);
+            }
+        }
+        // DB에서 글 조회 로직
         Article article = articleService.getArticleById(id);
         ArticleDetailResponseDto articleDetailResponseDto = new ArticleDetailResponseDto(article);
-        if (rq.isLoggedIn() && articleService.getLikeByArticleIdAndMemberId(article.getId(), memberService.findByUsername(rq.getUser().getUsername()).getId()) != null) {
-            articleDetailResponseDto.setLikeValue(true);
-        } else {
-            articleDetailResponseDto.setLikeValue(false);
-        }
+
+        // 좋아요 상태 설정
+        boolean isLiked = rq.isLoggedIn() && articleService.getLikeByArticleIdAndMemberId(article.getId(), memberId) != null;
+        articleDetailResponseDto.setLikeValue(isLiked);
 
         return GlobalResponse.of("200", "success", articleDetailResponseDto);
     }
@@ -205,10 +228,10 @@ public class ArticleController {
         return GlobalResponse.of("200", "추천취소되었습니다.");
     }
 
-    // 게시물 페이징
+    // 전체 글 조회(페이징)
     // tag 페이징 return도 추가
     // GlobalResponse에  ArticlePageResponse 담아서 보내주기
-    @GetMapping("/page")
+    @GetMapping("")
     @Operation(summary = "게시물 페이징", description = "게시물 페이징 시 사용하는 API")
     public GlobalResponse readAllPaging(
             @RequestParam(value = "pageNo", defaultValue = "0") int pageNo,
@@ -231,4 +254,45 @@ public class ArticleController {
         return GlobalResponse.of("200","success", result);
     }
 
+
+    @GetMapping("/detail/db/{id}")
+    @Operation(summary = "단일 글 db로 조회", description = "단일 글 조회 시 db만 사용하는 API")
+    public GlobalResponse showArticleByDB(@PathVariable("id") Long id)  {
+        Long memberId = 2L;
+        Article article = articleService.getArticleById(id);
+        ArticleDetailResponseDto articleDetailResponseDto = new ArticleDetailResponseDto(article);
+        boolean isLiked = rq.isLoggedIn() && articleService.getLikeByArticleIdAndMemberId(article.getId(), memberId) != null;
+        articleDetailResponseDto.setLikeValue(isLiked);
+        return GlobalResponse.of("200", "success", articleDetailResponseDto);
+    }
+
+
+    @GetMapping("/detail/redis/{id}")
+    @Operation(summary = "단일 글 redis로 조회", description = "단일 글 조회 시 redis만 사용하는 API")
+    public GlobalResponse showArticleByRedis(@PathVariable("id") Long id)  {
+        Long memberId = 2L;
+        ArticleDetailResponseDto articleDetailResponseDto = articleService.findRecentArticle(memberId, id);
+        if(articleDetailResponseDto != null) {
+            articleDetailResponseDto.setLikeValue(
+                    articleService.getLikeByArticleIdAndMemberId(articleDetailResponseDto.getId(), memberId) != null
+            );
+            return GlobalResponse.of("200", "success", articleDetailResponseDto);
+        }
+        else{
+            articleService.saveRecentReadArticle(memberId, id);
+            return GlobalResponse.of("200", "saved", articleDetailResponseDto);
+        }
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/liked")
+    @Operation(summary = "내가 추천한 게시물 목록", description = "내가 추천한 게시물 목록을 paging객체로 반환하는 API")
+    public GlobalResponse showLikedArticles(
+            @RequestParam(value = "pageNo", defaultValue = "0") int pageNo,
+            Principal principal
+    ) {
+        Member member = memberService.findByUsername(principal.getName());
+        Page<ArticleListResponseDto> likedArticlesPage = articleService.getLikedPaging(member, pageNo);
+        return GlobalResponse.of("200", "success", likedArticlesPage);
+    }
 }

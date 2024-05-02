@@ -6,6 +6,11 @@ spring:
     multipart:
       max-file-size: 50MB
       max-request-size: 50MB
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
   jpa:
     hibernate:
       ddl-auto: update
@@ -20,17 +25,19 @@ spring:
       client:
         registration:
           kakao:
-            clientId: ON_SECRET
+            clientId: '${kakao.clientId}'
             scope: profile_nickname, profile_image
             client-name: Kakao
             authorization-grant-type: authorization_code
-            redirect-uri: '${custom.dev.backUrl}/{action}/oauth2/code/{registrationId}'
+            redirect-uri: '${custom.site.backUrl}/{action}/oauth2/code/{registrationId}'
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+        custom:
+          redirectUrlAfterSocialLogin: http://localhost:3000/?check-social-login
   cloud:
     aws:
       accessKey: ON_SECRET
@@ -38,7 +45,10 @@ spring:
       regionName: kr-standard
       endpoint: https://kr.object.ncloudstorage.com
       bucketName: img-forest-image
-
+  data:
+    redis:
+      host: "${custom.dev.cookieDomain}"
+      port: 6379
 logging:
   level:
     com.ll.medium: DEBUG
@@ -46,13 +56,18 @@ logging:
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
+
 custom:
+  rebate:
+    rate: 0.7
+  order:
+    cancelableSeconds: 3600
   dev:
     cookieDomain: localhost
     frontUrl: "http://${custom.dev.cookieDomain}:3000"
     backUrl: "http://${custom.dev.cookieDomain}:${server.port}"
   prod:
-    cookieDomain: //img_Forest
+    cookieDomain: img.for-rest.site
     frontUrl: "https://${custom.prod.cookieDomain}"
     backUrl: "https://api.${custom.prod.cookieDomain}"
   site:
@@ -60,6 +75,10 @@ custom:
     frontUrl: "${custom.dev.frontUrl}"
     backUrl: "${custom.dev.backUrl}"
     name: img_Forest
+  tossPayments:
+    widget:
+      clientKey: test_ck_BX7zk2yd8yOdGY7pw9GLVx9POLqK
+      secretKey: ON_SECRET
 
 
 springdoc:
@@ -80,3 +99,4 @@ springdoc:
   model-and-view-allowed: true
   paths-to-match:
     - /api/**
+

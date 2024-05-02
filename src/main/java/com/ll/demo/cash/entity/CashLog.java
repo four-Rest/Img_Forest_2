@@ -9,21 +9,21 @@ import jakarta.persistence.ManyToOne;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import static lombok.AccessLevel.PROTECTED;
-
 @Entity
 @SuperBuilder
-@AllArgsConstructor(access = PROTECTED)
-@NoArgsConstructor(access = PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Setter
 @Getter
 @ToString(callSuper = true)
 public class CashLog extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private EvenType eventType;
+    private String relTypeCode;
+    private Long relId;
     @ManyToOne
     private Member member;
-    private long price;
+    private Long price;
 
     public enum EvenType {
         충전__무통장입금,

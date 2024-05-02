@@ -1,9 +1,9 @@
 package com.ll.demo.cash.service;
 
+
 import com.ll.demo.cash.entity.CashLog;
 import com.ll.demo.cash.repository.CashLogRepository;
 import com.ll.demo.global.entity.BaseEntity;
-
 import com.ll.demo.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional( readOnly = true)
+@Transactional(readOnly = true)
 public class CashService {
     private final CashLogRepository cashLogRepository;
 

@@ -7,6 +7,7 @@ on:
       - 'build.gradle'
       - 'Dockerfile'
 
+
     branches:
       - main
 jobs:
@@ -21,6 +22,7 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.ACCESS_GITHUB_TOKEN }}
+          fetch_all_tags: true
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1

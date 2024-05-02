@@ -29,7 +29,7 @@ public class ApiSecurityConfig {
                         authorizeRequests -> authorizeRequests
                                 .requestMatchers(HttpMethod.GET, "/api/*/detail/{id:\\d+}", "/api/*/posts", "/api/*/postComments/{id:\\d+}","/api/article/*")
                                 .permitAll()
-                                .requestMatchers("/api/member/login", "/api/member/logout", "/api/member/signup","/api/article", "api/member/checkAccessToken", "/api/article/like/{id:\\d+}" ,"/api/comment/*", "/api/comment/{id:\\d+}" ,"/api/member/sendEmail", "/api/member/verifyEmail")
+                                .requestMatchers("/api/member/login", "/api/member/logout", "/api/member/signup","/api/article", "api/member/checkAccessToken", "/api/article/like/{id:\\d+}" ,"/api/comment/*", "/api/comment/{id:\\d+}" ,"/api/member/sendEmail", "/api/member/verifyEmail" , "/api/article/detail/db/{id}", "/api/article/detail/redis/{id}")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()

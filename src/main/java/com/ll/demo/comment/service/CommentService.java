@@ -2,7 +2,11 @@ package com.ll.demo.comment.service;
 
 import com.ll.demo.article.entity.Article;
 import com.ll.demo.article.repository.ArticleRepository;
-import com.ll.demo.comment.dto.*;
+import com.ll.demo.comment.dto.comment.*;
+import com.ll.demo.comment.dto.reply.CreateReplyCommentRequest;
+import com.ll.demo.comment.dto.reply.DeleteReplyCommentResponse;
+import com.ll.demo.comment.dto.reply.UpdateReplyCommentRequest;
+import com.ll.demo.comment.dto.reply.UpdateReplyCommentResponse;
 import com.ll.demo.comment.entity.Comment;
 import com.ll.demo.comment.repository.CommentRepository;
 import com.ll.demo.member.entity.Member;
@@ -11,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 
 @Service
@@ -26,7 +31,6 @@ public class CommentService {
         Member member = this.verifyMember(request.getUsername());
         Article article = this.verifyArticle(request.getArticleId());
 
-        // TODO: JWT를 parse해서 해당 정보로 member를 가져올지에 대한 논의 필요.
         Comment saved = this.commentRepository.save(CreateCommentRequest.toEntity(request, member, article));
 
         return CreateCommentResponse.of(saved);
@@ -43,11 +47,6 @@ public class CommentService {
         return UpdateCommentResponse.of(this.commentRepository.save(saveComment));
     }
 
-    /**
-     * TODO: 논리적 삭제 구현에 대해서 상의 필요
-     * @param request
-     * @return
-     */
     @Transactional
     public DeleteCommentResponse delete(DeleteCommentRequest request) {
         this.verifyMember(request.getUsername());
@@ -57,6 +56,50 @@ public class CommentService {
         saveComment.setRemovedTime(LocalDateTime.now());
 
         return DeleteCommentResponse.of(this.commentRepository.save(saveComment));
+    }
+
+    @Transactional
+    public CreateCommentResponse createReply(Long commentId, CreateReplyCommentRequest request, Principal principal) {
+        Member member = this.verifyMember(principal.getName());
+
+        Comment saved = this.commentRepository.save(CreateReplyCommentRequest.toEntity(request, member));
+
+        Comment parentComment = verifyComment(commentId);
+        saved.setParentComment(parentComment);
+
+        return CreateCommentResponse.of(saved);
+    }
+
+    @Transactional
+    public UpdateReplyCommentResponse updateReply(Long replyId, UpdateReplyCommentRequest request, Principal principal) {
+        Member member = verifyMember(principal.getName());
+
+        Comment replyComment = verifyReplyComment(replyId);
+        if (!replyComment.getMember().equals(member)) {
+            throw new IllegalArgumentException("해당 대댓글을 수정할 권한이 없습니다.");
+        }
+        replyComment.setContent(request.getContent());
+        Comment updatedComment = commentRepository.save(replyComment);
+
+        return UpdateReplyCommentResponse.of(updatedComment);
+    }
+
+    @Transactional
+    public DeleteReplyCommentResponse deleteReply(Long commentId, Long replyId, Principal principal) {
+        Member member = verifyMember(principal.getName());
+
+        Comment replyComment = verifyReplyComment(replyId);
+        if (!replyComment.getMember().equals(member)) {
+            throw new IllegalArgumentException("해당 대댓글을 삭제할 권한이 없습니다.");
+        }
+
+        Comment parentComment = verifyComment(commentId);
+        parentComment.getChildComments().remove(replyComment);
+        replyComment.setRemovedTime(LocalDateTime.now());
+
+        commentRepository.save(replyComment);
+
+        return DeleteReplyCommentResponse.of(replyComment);
     }
 
     private Member verifyMember(String username) {
@@ -74,6 +117,12 @@ public class CommentService {
     private Comment verifyComment(Long id) {
         return this.commentRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("댓글이 존재하지 않습니다.")
+        );
+    }
+
+    private Comment verifyReplyComment(Long replyId) {
+        return this.commentRepository.findById(replyId).orElseThrow(() ->
+                new IllegalArgumentException("대댓글이 존재하지 않습니다.")
         );
     }
 }

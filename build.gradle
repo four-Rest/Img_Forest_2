@@ -80,7 +80,23 @@ dependencies {
     // spring mail
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-    implementation 'net.coobird:thumbnailator:0.4.14'
+    // JPA QueryDSL
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+    //spring redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    //spring batch
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
+    testImplementation 'org.springframework.batch:spring-batch-test'
+}
+
+compileJava {
+    options.compilerArgs << "-parameters"
 }
 
 tasks.named('test') {

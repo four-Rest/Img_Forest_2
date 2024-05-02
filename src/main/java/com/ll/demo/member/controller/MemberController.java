@@ -160,35 +160,6 @@ public class MemberController {
         return GlobalResponse.of("200", "유저 정보 반환", responseDto);
     }
 
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/mypage")
-    @Operation(summary = "내정보수정", description = "내정보수정 시 사용하는 API")
-    public GlobalResponse mypage(Principal principal, @RequestBody MyPageRequestDto dto){
-
-
-        Member member = memberService.findByUsername(principal.getName());
-        if(member != null){
-            return memberService.updateUserData(member, dto);
-        } else{
-            return GlobalResponse.of("403", "확인되지 않은 유저입니다.");
-        }
-    }
-
-
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/update")
-    @Operation(summary = "마이페이지", description = "마이페이지 시 사용하는 API")
-    public GlobalResponse updateMemberInfo(Principal principal) {
-        String username = principal.getName();
-        Member member = memberService.findByUsername(username);
-        if(member != null) {
-            MemberInfoUpdateResponseDto dto = memberService.getMemberInfo(member);
-            return GlobalResponse.of("200","success",dto);
-        }else {
-            return GlobalResponse.of("403","확인되지 않은 유저입니다.");
-        }
-
-    }
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/update")
@@ -226,8 +197,12 @@ public class MemberController {
             // 유효한 토큰인 경우 해당 유저의 정보를 반환
             Map<String, Object> data = (Map<String, Object>) claims.get("data");
             String username = (String) data.get("username");
+            System.out.println("kakaoLogin == " + data.get("kakaoLogin"));
             Member member = memberService.findByUsername(username);
-            return GlobalResponse.of("200", "로그인 성공.", new LoginResponseDto(member));
+            if(data.get("kakaoLogin").equals("true")){
+                return GlobalResponse.of("200", "로그인 성공.", new LoginResponseDto(member, (String) data.get("kakaoLogin")));
+            }
+            else return GlobalResponse.of("200", "로그인 성공.", new LoginResponseDto(member));
         } catch (Exception e) {
             // 다른 예외들 (토큰 만료, 지원하지 않는 JWT 등)
             System.err.println("Token validation error: " + e.getMessage());
