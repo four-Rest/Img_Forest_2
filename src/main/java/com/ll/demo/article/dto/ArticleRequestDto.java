@@ -9,13 +9,16 @@ import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @Validated
 public class ArticleRequestDto {
     private String content;
-    private String tagString;
+    private String[] tagArray;
     private MultipartFile multipartFile;
     private Long price;
     private boolean paid;
