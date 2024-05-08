@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class ArticleRequestDtoMode2 {
     private String content;
-    private String tagString;
+    private String[] tagArray;
 
 }

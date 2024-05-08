@@ -58,9 +58,9 @@ public class ArticleService {
                 .paid(articleRequestDto.isPaid())
                 .likes(0)
                 .build();
-        String tagString = articleRequestDto.getTagString();
-        if (tagString != null) {
-            articleTagService.update(article, tagString);
+        String[] tagArray = articleRequestDto.getTagArray();
+        if (tagArray != null) {
+            articleTagService.update(article, tagArray);
         }
         Image image = imageService.create(article, articleRequestDto.getMultipartFile());
         article.setImage(image);
@@ -94,8 +94,8 @@ public class ArticleService {
     public void modifyPaidArticle(Article article, ArticleRequestDto articleRequestDto) {
         //내용과 태그 변경
         article.modifyContent(articleRequestDto.getContent());
-        if (articleRequestDto.getTagString() != null) {
-            articleTagService.update(article, articleRequestDto.getTagString());
+        if (articleRequestDto.getTagArray() != null) {
+            articleTagService.update(article, articleRequestDto.getTagArray());
         }
     }
 
@@ -104,8 +104,8 @@ public class ArticleService {
         //내용과 태그 변경
         article.modifyContent(articleRequestDto.getContent());
 
-        if (articleRequestDto.getTagString() != null) {
-            articleTagService.update(article, articleRequestDto.getTagString());
+        if (articleRequestDto.getTagArray() != null) {
+            articleTagService.update(article, articleRequestDto.getTagArray());
         }
         if (articleRequestDto.getMultipartFile() != null) {
             //이미지 교체
@@ -116,8 +116,8 @@ public class ArticleService {
     @Transactional
     public void modifyArticle(Article article, ArticleRequestDtoMode2 articleRequestDto) {
         article.modifyContent(articleRequestDto.getContent());
-        if (articleRequestDto.getTagString() != null) {
-            articleTagService.update(article, articleRequestDto.getTagString());
+        if (articleRequestDto.getTagArray() != null) {
+            articleTagService.update(article, articleRequestDto.getTagArray());
         }
         articleRepository.save(article);
     }

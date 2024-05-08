@@ -19,15 +19,14 @@ public class TagService {
 
     public Tag create(String tagName) {
             Tag tag = new Tag();
-            tag.setTagName(tagName);
+            tag.setTagName(tagName.toLowerCase());
             tagRepository.save(tag);
             return tag;
     }
 
 
-    public Set<Tag> parseTagStringIntoSet(String tagString) {
+    public Set<Tag> toTagSet(String[] tagArray) {
         Set<Tag> tags = new HashSet<>();
-        String[] tagArray = tagString.split(" ");
         for (String tagName : tagArray) {
             if (tagRepository.findByTagName(tagName) != null) {
                 tags.add(tagRepository.findByTagName(tagName));

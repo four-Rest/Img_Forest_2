@@ -103,7 +103,7 @@ public class ImgTestDataConfig {
                             originalFilename, contentType, content);
                     ArticleRequestDto articleRequestDto = new ArticleRequestDto();
                     articleRequestDto.setContent("content of test article %d".formatted(i + 1));
-                    articleRequestDto.setTagString("test example image %d".formatted(i + 1));
+                    articleRequestDto.setTagArray("test example image %d".formatted(i + 1).split(" "));
                     articleRequestDto.setMultipartFile(multipartFile);
 
                     articleService.create(articleRequestDto, member);
