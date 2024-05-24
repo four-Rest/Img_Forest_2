@@ -52,13 +52,13 @@ public class ArticleController {
     private final ImageService imageService;
     private final Rq rq;
 
-//    //전체 글 조회
-//    @GetMapping("")
-//    @Operation(summary = "전체 글 조회", description = "전체 글 조회 시 사용하는 API")
-//    public GlobalResponse findAllArticles() {
-//        List<ArticleListResponseDto> articleListResponseDtoList = articleService.findAllOrderByLikesDesc();
-//        return GlobalResponse.of("200", "success", articleListResponseDtoList);
-//    }
+    //전체 글 조회
+    @GetMapping("/all")
+    @Operation(summary = "전체 글 조회", description = "전체 글 조회 시 사용하는 API")
+    public GlobalResponse findAllArticles() {
+        List<ArticleListResponseDto> articleListResponseDtoList = articleService.findAllOrderByLikesDesc();
+        return GlobalResponse.of("200", "success", articleListResponseDtoList);
+    }
 
     //단일 글 조회
     @GetMapping("/detail/{id}")

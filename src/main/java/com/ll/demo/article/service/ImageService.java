@@ -1,5 +1,4 @@
 package com.ll.demo.article.service;
-import net.coobird.thumbnailator.Thumbnails;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
@@ -11,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 
 import java.io.ByteArrayInputStream;
@@ -32,35 +34,74 @@ public class ImageService {
 
 
 
+//    @Transactional
+//    public Image create(Article article, MultipartFile multipartFile) throws IOException {
+//
+//        //저장 경로, 파일 이름 설정
+//        String imgPath = setImagePath();
+//
+//        UUID uuid = UUID.randomUUID();
+//
+//        String fileName = uuid + "_" + multipartFile.getOriginalFilename();
+//
+//        //멀티파트 파일을 일반 파일로 전환
+//        File file = convertMultipartFileToFile(multipartFile);
+//
+//        ByteArrayOutputStream os = new ByteArrayOutputStream();
+//        Thumbnails.of(file)
+//                .scale(1.0)
+//                .outputQuality(0.8)
+//                .toOutputStream(os);
+//
+//        byte[] optimizedImageBytes = os.toByteArray();
+//
+//        File optimizedFile = new File(file.getParentFile(),fileName);
+//        try (FileOutputStream optimizedFileStream = new FileOutputStream(optimizedFile)) {
+//            optimizedFileStream.write(optimizedImageBytes);
+//       }
+//
+//        //Object storage에 업로드
+//        try {
+//            s3.putObject(new PutObjectRequest(s3Util.getBucketName(), imgPath + "/" + fileName, file)
+//                    .withCannedAcl(CannedAccessControlList.PublicRead));
+//        } catch (AmazonS3Exception e) {
+//            e.printStackTrace();
+//        } catch(SdkClientException e) {
+//            e.printStackTrace();
+//        }
+//
+//        //이미지 객체 생성
+//        Image image = Image.builder()
+//                .article(article)
+//                .fileName(fileName)
+//                .path(imgPath)
+//                .build();
+//
+//        //저장
+//        imageRepository.save(image);
+//
+//        //로컬에 생성된 파일 삭제
+//        file.delete();
+//        // optimizedFile.delete();
+//
+//
+//        return image;
+//
+//    }
+
     @Transactional
     public Image create(Article article, MultipartFile multipartFile) throws IOException {
 
         //저장 경로, 파일 이름 설정
         String imgPath = setImagePath();
 
-        UUID uuid = UUID.randomUUID();
-
-        String fileName = uuid + "_" + multipartFile.getOriginalFilename();
-
-        //멀티파트 파일을 일반 파일로 전환
-        File file = convertMultipartFileToFile(multipartFile);
-
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        Thumbnails.of(file)
-                .scale(1.0)
-                .outputQuality(0.8)
-                .toOutputStream(os);
-
-        byte[] optimizedImageBytes = os.toByteArray();
-
-        File optimizedFile = new File(file.getParentFile(),fileName);
-        try (FileOutputStream optimizedFileStream = new FileOutputStream(optimizedFile)) {
-            optimizedFileStream.write(optimizedImageBytes);
-       }
+        // 멀티파트 파일을 PNG 형식의 파일로 전환, PNG 파일의 이름을 받아옴
+        File pngFile = convertMultipartFileToPngFile(multipartFile);
+        String pngFileName = pngFile.getName();
 
         //Object storage에 업로드
         try {
-            s3.putObject(new PutObjectRequest(s3Util.getBucketName(), imgPath + "/" + fileName, file)
+            s3.putObject(new PutObjectRequest(s3Util.getBucketName(), imgPath + "/" + pngFileName, pngFile)
                     .withCannedAcl(CannedAccessControlList.PublicRead));
         } catch (AmazonS3Exception e) {
             e.printStackTrace();
@@ -71,7 +112,7 @@ public class ImageService {
         //이미지 객체 생성
         Image image = Image.builder()
                 .article(article)
-                .fileName(fileName)
+                .fileName(pngFileName)
                 .path(imgPath)
                 .build();
 
@@ -79,23 +120,38 @@ public class ImageService {
         imageRepository.save(image);
 
         //로컬에 생성된 파일 삭제
-        file.delete();
-        // optimizedFile.delete();
-
+        pngFile.delete();
 
         return image;
 
     }
 
+//    @Transactional
+//    public File convertMultipartFileToFile(MultipartFile file) throws IOException {
+//        File convertedFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
+//        FileOutputStream fos = new FileOutputStream(convertedFile);
+//        fos.write(file.getBytes());
+//        fos.close();
+//        return convertedFile;
+//    }
+
+
     @Transactional
-    public File convertMultipartFileToFile(MultipartFile file) throws IOException {
-        File convertedFile = new File(Objects.requireNonNull(file.getOriginalFilename()));
-        FileOutputStream fos = new FileOutputStream(convertedFile);
-        fos.write(file.getBytes());
-        fos.close();
+    public File convertMultipartFileToPngFile(MultipartFile multipartFile) throws  IOException {
+        // 파일명에서 확장자를 제외한 부분과 새로운 UUID를 결합하여 PNG 파일명 생성
+        String originalFileName= Objects.requireNonNull(multipartFile.getOriginalFilename()).split("\\.")[0];
+        String newFileName = UUID.randomUUID() + "_" + originalFileName + ".png";
+        File convertedFile = new File(newFileName);
+
+
+        // 멀티파트 파일을 BufferedImage로 변환
+        BufferedImage image = ImageIO.read(multipartFile.getInputStream());
+
+        // BufferedImage를 PNG 형식으로 파일에 쓰기
+        ImageIO.write(image, "PNG",convertedFile);
+
         return convertedFile;
     }
-
 
     @Transactional
     public String setImagePath() {
@@ -170,17 +226,20 @@ public class ImageService {
         }
 
         //새 이미지 파일 저장
-        UUID uuid = UUID.randomUUID();
+//        UUID uuid = UUID.randomUUID();
+//
+//        String newFileName = uuid + "_" + multipartFile.getOriginalFilename();
+//
+//        //멀티파트 파일을 일반 파일로 전환
+//        File file = convertMultipartFileToFile(multipartFile);
 
-        String newFileName = uuid + "_" + multipartFile.getOriginalFilename();
-
-        //멀티파트 파일을 일반 파일로 전환
-        File file = convertMultipartFileToFile(multipartFile);
+        File pngFile = convertMultipartFileToPngFile(multipartFile);
+        String newPngFileName = pngFile.getName();
 
 
         //Object storage에 업로드
         try {
-            s3.putObject(new PutObjectRequest(s3Util.getBucketName(), newFilePath + "/" + newFileName, file)
+            s3.putObject(new PutObjectRequest(s3Util.getBucketName(), newFilePath + "/" + newPngFileName, pngFile)
                     .withCannedAcl(CannedAccessControlList.PublicRead));
         } catch (AmazonS3Exception e) {
             e.printStackTrace();
@@ -189,11 +248,11 @@ public class ImageService {
         }
 
         //Image객체의 fileName, path를 새 이미지파일로 변경
-        image.modifyFileName(newFileName);
+        image.modifyFileName(newPngFileName);
         image.modifyPath(newFilePath);
 
         //로컬에 생성된 파일 삭제
-        file.delete();
+        pngFile.delete();
     }
 
 }

@@ -1,5 +1,7 @@
 package com.ll.demo.member.service;
 
+import com.ll.demo.cash.entity.CashLog;
+import com.ll.demo.cash.service.CashService;
 import com.ll.demo.global.config.JwtProperties;
 import com.ll.demo.global.response.GlobalResponse;
 import com.ll.demo.member.dto.*;
@@ -28,6 +30,7 @@ public class MemberService {
     private final JwtProperties jwtProperties;
     private final EmailRepository emailRepository;
     private final EmailService emailService;
+    private final CashService cashService;
 
     @Transactional
     public GlobalResponse<Member> signup(MemberCreateRequestDto dto) {
@@ -212,4 +215,12 @@ public class MemberService {
         emailRepository.deleteByExpiresTimeBefore(LocalDateTime.now());
     }
 
+
+    @Transactional
+    public void addCash(Member member, long price, CashLog.EvenType eventType) {
+        CashLog cashLog = cashService.addCash(member, price, eventType);
+
+        long newRestCash = member.getRestCash() + cashLog.getPrice();
+        member.setRestCash(newRestCash);
+    }
 }
