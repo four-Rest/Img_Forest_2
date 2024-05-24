@@ -96,6 +96,10 @@ public class ArticleController {
     @GetMapping("/{tagName}")
     @Operation(summary = "Tag값으로 글 검색", description = "Tag값으로 글 검색 시 사용하는 API")
     public GlobalResponse searchArticlesByTag(@PathVariable("tagName") String tagName) {
+        if (tagService.getArticlesByTagName(tagName) == null) {
+
+            return GlobalResponse.of("204", "no data");
+        }
         Set<ArticleListResponseDto> articleListResponseDtoSet = tagService.getArticlesByTagName(tagName)
                 .stream()
                 .map(article -> new ArticleListResponseDto(article))
