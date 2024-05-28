@@ -11,7 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 
@@ -143,12 +147,25 @@ public class ImageService {
         String newFileName = UUID.randomUUID() + "_" + originalFileName + ".png";
         File convertedFile = new File(newFileName);
 
-
-        // 멀티파트 파일을 BufferedImage로 변환
         BufferedImage image = ImageIO.read(multipartFile.getInputStream());
 
-        // BufferedImage를 PNG 형식으로 파일에 쓰기
-        ImageIO.write(image, "PNG",convertedFile);
+        // PNG 형식으로 파일에 쓰기 (TwelveMonkeys 라이브러리 사용)
+        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("png");
+        if(!writers.hasNext()) {
+            throw new IllegalArgumentException("No writers : png");
+        }
+        ImageWriter writer = writers.next();
+
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(convertedFile)) {
+            writer.setOutput(ios);
+
+            ImageWriteParam writeParam = writer.getDefaultWriteParam();
+            // 무손실 압축이므로 압축 품질을 설정하지 않음
+
+            writer.write(null, new IIOImage(image, null, null), writeParam);
+        } finally {
+            writer.dispose();
+        }
 
         return convertedFile;
     }

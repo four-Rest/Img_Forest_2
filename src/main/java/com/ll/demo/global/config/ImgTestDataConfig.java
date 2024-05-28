@@ -85,7 +85,7 @@ public class ImgTestDataConfig {
                     );
 
             //객체화, article 데이터 생성
-                for (int i = 0; i < 15; i++) {
+                for (int i = 0; i <15; i++) {
 
                     //테스트이미지 파일을 테스트용 multipartFile로 불러옴
 

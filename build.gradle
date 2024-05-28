@@ -93,6 +93,11 @@ dependencies {
     //spring batch
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     testImplementation 'org.springframework.batch:spring-batch-test'
+
+    // twelvemonkeys
+    implementation 'com.twelvemonkeys.imageio:imageio-core:3.8.2'
+    implementation 'com.twelvemonkeys.imageio:imageio-jpeg:3.8.2'
+    implementation 'com.twelvemonkeys.imageio:imageio-png:3.8.2'
 }
 
 compileJava {
