@@ -53,9 +53,10 @@ public class CommentService {
         this.verifyArticle(request.getArticleId());
 
         Comment saveComment = this.verifyComment(request.getCommentId());
-        saveComment.setRemovedTime(LocalDateTime.now());
+//        saveComment.setRemovedTime(LocalDateTime.now());
+        commentRepository.delete(saveComment);
 
-        return DeleteCommentResponse.of(this.commentRepository.save(saveComment));
+        return DeleteCommentResponse.of(saveComment);
     }
 
     @Transactional

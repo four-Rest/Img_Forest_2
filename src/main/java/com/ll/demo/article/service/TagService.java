@@ -39,6 +39,9 @@ public class TagService {
 
     public Set<Article> getArticlesByTagName(String tagName) {
         Tag tag = tagRepository.findByTagName(tagName);
+        if (tag == null) {
+            return null;
+        }
         Set<Article> articles = tag.getArticleTags()
                 .stream()
                 .map(articleTag -> articleTag.getArticle())

@@ -96,6 +96,10 @@ public class ArticleController {
     @GetMapping("/{tagName}")
     @Operation(summary = "Tag값으로 글 검색", description = "Tag값으로 글 검색 시 사용하는 API")
     public GlobalResponse searchArticlesByTag(@PathVariable("tagName") String tagName) {
+        if (tagService.getArticlesByTagName(tagName) == null) {
+
+            return GlobalResponse.of("204", "no data");
+        }
         Set<ArticleListResponseDto> articleListResponseDtoSet = tagService.getArticlesByTagName(tagName)
                 .stream()
                 .map(article -> new ArticleListResponseDto(article))
@@ -117,11 +121,9 @@ public class ArticleController {
             return GlobalResponse.of("401", "로그인이 필요한 서비스입니다.");
         }
 
-        System.out.println("게시글 유료화 여부:"+ articleRequestDto.isPaid());
+        Article article = articleService.create(articleRequestDto, member);
 
-        articleService.create(articleRequestDto, member);
-
-        return GlobalResponse.of("200", "Article created");
+        return GlobalResponse.of("200", "Article created", article.getId());
     }
 
 
