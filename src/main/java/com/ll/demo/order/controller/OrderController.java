@@ -83,9 +83,12 @@ public class OrderController {
         try {
             // 체크
             orderService.checkCanPay(orderId, Long.parseLong(amount));
-        } catch(Exception e) {
-            throw new RuntimeException("결제 유효성 검사 실패",e);
+        } catch(NumberFormatException e) {
+            throw new RuntimeException("amount format 오류" + amount , e);
+        }catch (IllegalArgumentException e) {
+            throw new RuntimeException("결제 유효성 검사 실패" , e);
         }
+
         JSONObject obj = new JSONObject();
         obj.put("orderId", orderId);
         obj.put("amount", amount);
@@ -127,21 +130,22 @@ public class OrderController {
             throw new RuntimeException("결제 승인 실패");
         }
 
-        InputStream responseStream = isSuccess ? connection.getInputStream() : connection.getErrorStream();
+        try (InputStream responseStream = isSuccess ? connection.getInputStream() : connection.getErrorStream();
+             Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8)) {
 
-        // TODO: 결제 성공 및 실패 비즈니스 로직을 구현하세요.
-        Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
-        StringWriter writer = new StringWriter();
-        char[] buffer = new char[1024];
-        int n;
-        while((n = reader.read(buffer)) != -1) {
-            writer.write(buffer,0,n);
+            StringWriter writer = new StringWriter();
+            char[] buffer = new char[1024];
+            int n;
+            while ((n = reader.read(buffer)) != -1) {
+                writer.write(buffer, 0, n);
+            }
+            String responseString = writer.toString();
+            JSONObject jsonObject = new JSONObject(responseString);
+
+            return ResponseEntity.status(code).body(jsonObject);
+        } catch (IOException e) {
+            throw new RuntimeException("응답 값 읽기 실패" , e);
         }
-        String responseString = writer.toString();
-        JSONObject jsonObject = new JSONObject(responseString);
-        responseStream.close();
-
-        return ResponseEntity.status(code).body(jsonObject);
     }
 
 
