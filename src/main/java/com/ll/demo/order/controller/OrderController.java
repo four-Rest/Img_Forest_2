@@ -76,12 +76,16 @@ public class OrderController {
             paymentKey = jsonObject1.getString("paymentKey");
             orderId = jsonObject1.getString("orderId");
             amount = jsonObject1.getString("amount");
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException("유효하지 않은 JSON input",e);
         }
-        // 체크
-        orderService.checkCanPay(orderId, Long.parseLong(amount));
 
+        try {
+            // 체크
+            orderService.checkCanPay(orderId, Long.parseLong(amount));
+        } catch(Exception e) {
+            throw new RuntimeException("결제 유효성 검사 실패",e);
+        }
         JSONObject obj = new JSONObject();
         obj.put("orderId", orderId);
         obj.put("amount", amount);
@@ -95,8 +99,8 @@ public class OrderController {
         // 비밀번호가 없다는 것을 알리기 위해 시크릿 키 뒤에 콜론을 추가합니다.
         // @docs https://docs.tosspayments.com/reference/using-api/authorization#%EC%9D%B8%EC%A6%9D
         Base64.Encoder encoder = Base64.getEncoder();
-        byte[] encodedBytes = encoder.encode((apiKey + ":").getBytes("UTF-8"));
-        String authorizations = "Basic " + new String(encodedBytes, 0, encodedBytes.length);
+        byte[] encodedBytes = encoder.encode((apiKey + ":").getBytes(StandardCharsets.UTF_8));
+        String authorizations = "Basic " + new String(encodedBytes, StandardCharsets.UTF_8);
 
         // 결제 승인 API를 호출하세요.
         // 결제를 승인하면 결제수단에서 금액이 차감돼요.
@@ -109,7 +113,7 @@ public class OrderController {
         connection.setDoOutput(true);
 
         OutputStream outputStream = connection.getOutputStream();
-        outputStream.write(obj.toString().getBytes("UTF-8"));
+        outputStream.write(obj.toString().getBytes(StandardCharsets.UTF_8));
         outputStream.flush();
         outputStream.close();
 
@@ -118,7 +122,7 @@ public class OrderController {
 
         // 결제 승인이 완료
         if (isSuccess) {
-            orderService.payByTossPayments(orderService.findByCode(orderId).get(), Long.parseLong(amount));
+            orderService.payByTossPayments(orderService.findByCode(orderId).orElseThrow(() -> new RuntimeException("주문을 찾을 수 없음")), Long.parseLong(amount));
         } else {
             throw new RuntimeException("결제 승인 실패");
         }

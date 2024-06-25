@@ -30,7 +30,6 @@ public class OrderService {
     private final CartService cartService;
     private final MemberService memberService;
     private final PurchasedArticleService purchasedArticleService;
-    private final OrderItemRepository orderItemRepository;
 
 
     // 기존에 구매한 article이면 구매 불가하게 만들기
