@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,10 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.Reader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -69,17 +67,16 @@ public class OrderController {
     @PostMapping("/confirm2")
     public ResponseEntity<JSONObject> confirmPayment2(@RequestBody String jsonBody) throws Exception {
 
-        JSONParser parser = new JSONParser();
         String orderId;
         String amount;
         String paymentKey;
         try {
             // 클라이언트에서 받은 JSON 요청 바디입니다.
-            JSONObject requestData = (JSONObject) parser.parse(jsonBody);
-            paymentKey = (String) requestData.get("paymentKey");
-            orderId = (String) requestData.get("orderId");
-            amount = (String) requestData.get("amount");
-        } catch (ParseException e) {
+            JSONObject jsonObject1 = new JSONObject(jsonBody);
+            paymentKey = jsonObject1.getString("paymentKey");
+            orderId = jsonObject1.getString("orderId");
+            amount = jsonObject1.getString("amount");
+        } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
         // 체크
@@ -113,9 +110,11 @@ public class OrderController {
 
         OutputStream outputStream = connection.getOutputStream();
         outputStream.write(obj.toString().getBytes("UTF-8"));
+        outputStream.flush();
+        outputStream.close();
 
         int code = connection.getResponseCode();
-        boolean isSuccess = code == 200 ? true : false;
+        boolean isSuccess = code == 200 ;
 
         // 결제 승인이 완료
         if (isSuccess) {
@@ -128,7 +127,14 @@ public class OrderController {
 
         // TODO: 결제 성공 및 실패 비즈니스 로직을 구현하세요.
         Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
-        JSONObject jsonObject = (JSONObject) parser.parse(reader);
+        StringWriter writer = new StringWriter();
+        char[] buffer = new char[1024];
+        int n;
+        while((n = reader.read(buffer)) != -1) {
+            writer.write(buffer,0,n);
+        }
+        String responseString = writer.toString();
+        JSONObject jsonObject = new JSONObject(responseString);
         responseStream.close();
 
         return ResponseEntity.status(code).body(jsonObject);
