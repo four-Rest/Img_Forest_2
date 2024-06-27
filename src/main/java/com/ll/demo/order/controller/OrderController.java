@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,10 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.Reader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -69,21 +67,27 @@ public class OrderController {
     @PostMapping("/confirm2")
     public ResponseEntity<JSONObject> confirmPayment2(@RequestBody String jsonBody) throws Exception {
 
-        JSONParser parser = new JSONParser();
         String orderId;
         String amount;
         String paymentKey;
         try {
             // 클라이언트에서 받은 JSON 요청 바디입니다.
-            JSONObject requestData = (JSONObject) parser.parse(jsonBody);
-            paymentKey = (String) requestData.get("paymentKey");
-            orderId = (String) requestData.get("orderId");
-            amount = (String) requestData.get("amount");
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+            JSONObject jsonObject1 = new JSONObject(jsonBody);
+            paymentKey = jsonObject1.getString("paymentKey");
+            orderId = jsonObject1.getString("orderId");
+            amount = jsonObject1.getString("amount");
+        } catch (Exception e) {
+            throw new RuntimeException("유효하지 않은 JSON input",e);
         }
-        // 체크
-        orderService.checkCanPay(orderId, Long.parseLong(amount));
+
+        try {
+            // 체크
+            orderService.checkCanPay(orderId, Long.parseLong(amount));
+        } catch(NumberFormatException e) {
+            throw new RuntimeException("amount format 오류" + amount , e);
+        }catch (IllegalArgumentException e) {
+            throw new RuntimeException("결제 유효성 검사 실패" , e);
+        }
 
         JSONObject obj = new JSONObject();
         obj.put("orderId", orderId);
@@ -98,8 +102,8 @@ public class OrderController {
         // 비밀번호가 없다는 것을 알리기 위해 시크릿 키 뒤에 콜론을 추가합니다.
         // @docs https://docs.tosspayments.com/reference/using-api/authorization#%EC%9D%B8%EC%A6%9D
         Base64.Encoder encoder = Base64.getEncoder();
-        byte[] encodedBytes = encoder.encode((apiKey + ":").getBytes("UTF-8"));
-        String authorizations = "Basic " + new String(encodedBytes, 0, encodedBytes.length);
+        byte[] encodedBytes = encoder.encode((apiKey + ":").getBytes(StandardCharsets.UTF_8));
+        String authorizations = "Basic " + new String(encodedBytes, StandardCharsets.UTF_8);
 
         // 결제 승인 API를 호출하세요.
         // 결제를 승인하면 결제수단에서 금액이 차감돼요.
@@ -112,26 +116,36 @@ public class OrderController {
         connection.setDoOutput(true);
 
         OutputStream outputStream = connection.getOutputStream();
-        outputStream.write(obj.toString().getBytes("UTF-8"));
+        outputStream.write(obj.toString().getBytes(StandardCharsets.UTF_8));
+        outputStream.flush();
+        outputStream.close();
 
         int code = connection.getResponseCode();
-        boolean isSuccess = code == 200 ? true : false;
+        boolean isSuccess = code == 200 ;
 
         // 결제 승인이 완료
         if (isSuccess) {
-            orderService.payByTossPayments(orderService.findByCode(orderId).get(), Long.parseLong(amount));
+            orderService.payByTossPayments(orderService.findByCode(orderId).orElseThrow(() -> new RuntimeException("주문을 찾을 수 없음")), Long.parseLong(amount));
         } else {
             throw new RuntimeException("결제 승인 실패");
         }
 
-        InputStream responseStream = isSuccess ? connection.getInputStream() : connection.getErrorStream();
+        try (InputStream responseStream = isSuccess ? connection.getInputStream() : connection.getErrorStream();
+             Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8)) {
 
-        // TODO: 결제 성공 및 실패 비즈니스 로직을 구현하세요.
-        Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8);
-        JSONObject jsonObject = (JSONObject) parser.parse(reader);
-        responseStream.close();
+            StringWriter writer = new StringWriter();
+            char[] buffer = new char[1024];
+            int n;
+            while ((n = reader.read(buffer)) != -1) {
+                writer.write(buffer, 0, n);
+            }
+            String responseString = writer.toString();
+            JSONObject jsonObject = new JSONObject(responseString);
 
-        return ResponseEntity.status(code).body(jsonObject);
+            return ResponseEntity.status(code).body(jsonObject);
+        } catch (IOException e) {
+            throw new RuntimeException("응답 값 읽기 실패" , e);
+        }
     }
 
 
