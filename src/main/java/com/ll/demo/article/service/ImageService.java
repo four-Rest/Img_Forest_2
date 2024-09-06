@@ -47,8 +47,8 @@ public class ImageService {
 
         //Object storage에 업로드
         try {
-            s3.putObject(new PutObjectRequest(s3Util.getBucketName(), imgPath + "/" + fileName, file)
-                    .withCannedAcl(CannedAccessControlList.PublicRead));
+            String fullPath = imgPath + fileName;
+            s3.putObject(new PutObjectRequest(s3Util.getBucketName(), imgPath + fileName, file));
         } catch (AmazonS3Exception e) {
             e.printStackTrace();
         } catch(SdkClientException e) {
@@ -88,14 +88,13 @@ public class ImageService {
         //현재 날짜를 폴더 이름으로 지정
         LocalDateTime createdTime = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-        String path = createdTime.format(formatter);
+        String path = createdTime.format(formatter) + "/";
 
         //path폴더가 있는지 확인
-        String folderPath = path + "/";
 
         ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
                 .withBucketName(s3Util.getBucketName())
-                .withPrefix(folderPath)
+                .withPrefix(path)
                 .withDelimiter("/");
 
         ObjectListing objects = s3.listObjects(listObjectsRequest);
@@ -126,7 +125,7 @@ public class ImageService {
         String fileName = image.getFileName();
 
         try {
-            s3.deleteObject(s3Util.getBucketName(), path + "/" + fileName);
+            s3.deleteObject(s3Util.getBucketName(), path + fileName);
         } catch (AmazonS3Exception e) {
             e.printStackTrace();
         } catch(SdkClientException e) {
@@ -147,7 +146,7 @@ public class ImageService {
         String oldFilePath = image.getPath();
 
         try {
-            s3.deleteObject(s3Util.getBucketName(), oldFilePath + "/" + oldFileName);
+            s3.deleteObject(s3Util.getBucketName(), oldFilePath + oldFileName);
         } catch (AmazonS3Exception e) {
             e.printStackTrace();
         } catch(SdkClientException e) {
@@ -165,7 +164,7 @@ public class ImageService {
 
         //Object storage에 업로드
         try {
-            s3.putObject(new PutObjectRequest(s3Util.getBucketName(), newFilePath + "/" + newFileName, file)
+            s3.putObject(new PutObjectRequest(s3Util.getBucketName(), newFilePath + newFileName, file)
                     .withCannedAcl(CannedAccessControlList.PublicRead));
         } catch (AmazonS3Exception e) {
             e.printStackTrace();

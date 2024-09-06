@@ -40,11 +40,11 @@ spring:
           redirectUrlAfterSocialLogin: http://localhost:3000/?check-social-login
   cloud:
     aws:
+      stack.auto: false
       accessKey: ON_SECRET
       secretKey: ON_SECRET
-      regionName: kr-standard
-      endpoint: https://kr.object.ncloudstorage.com
-      bucketName: img-forest-image
+      regionName: ap-northeast-2
+      bucketName: imgforestdev
   data:
     redis:
       host: "${custom.dev.cookieDomain}"

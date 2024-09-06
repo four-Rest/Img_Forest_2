@@ -20,7 +20,6 @@ public class S3Properties {
     private String accessKey;
     private String secretKey;
     private String regionName;
-    private String endpoint;
     private String bucketName;
 
 
@@ -30,7 +29,7 @@ public class S3Properties {
 
         return AmazonS3ClientBuilder
                 .standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, regionName))
+                .withRegion(regionName)
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .build();
     }
