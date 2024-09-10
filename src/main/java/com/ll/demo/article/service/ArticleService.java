@@ -46,7 +46,7 @@ public class ArticleService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public void create(ArticleRequestDto articleRequestDto, Member member) throws IOException {
+    public void create(ArticleRequestDto articleRequestDto, Member member) throws IOException,InterruptedException {
 
         if(articleRequestDto.getMultipartFile() == null) {
             throw new IllegalArgumentException("적어도 하나의 이미지를 업로드해야 합니다.");

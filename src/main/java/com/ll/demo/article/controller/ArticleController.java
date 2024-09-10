@@ -109,7 +109,7 @@ public class ArticleController {
     @Operation(summary = "글 생성", description = "글 생성 시 사용하는 API")
     public GlobalResponse createArticle(
             @Valid ArticleRequestDto articleRequestDto,
-            Principal principal) throws IOException {
+            Principal principal) throws IOException,InterruptedException {
         // 사용자 인증 정보 가져오기
         Member member = memberService.findByUsername(principal.getName());
 

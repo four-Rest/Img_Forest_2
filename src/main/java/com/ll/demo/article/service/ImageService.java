@@ -94,40 +94,42 @@ public class ImageService {
 //    }
 
     @Transactional
-    public Image create(Article article, MultipartFile multipartFile) throws IOException {
+    public Image create(Article article, MultipartFile multipartFile) throws IOException, InterruptedException {
 
-        //저장 경로, 파일 이름 설정
+        // 저장 경로, 파일 이름 설정
         String imgPath = setImagePath();
 
         // 멀티파트 파일을 PNG 형식의 파일로 전환, PNG 파일의 이름을 받아옴
         File pngFile = convertMultipartFileToPngFile(multipartFile);
         String pngFileName = pngFile.getName();
 
-        //Object storage에 업로드
+        // OptiPNG로 PNG 파일 최적화
+        optimizePngFile(pngFile);  // 최적화 함수 호출
+
+        // Object storage에 업로드
         try {
             s3.putObject(new PutObjectRequest(s3Util.getBucketName(), imgPath + "/" + pngFileName, pngFile)
                     .withCannedAcl(CannedAccessControlList.PublicRead));
         } catch (AmazonS3Exception e) {
             e.printStackTrace();
-        } catch(SdkClientException e) {
+        } catch (SdkClientException e) {
             e.printStackTrace();
         }
 
-        //이미지 객체 생성
+        // 이미지 객체 생성
         Image image = Image.builder()
                 .article(article)
                 .fileName(pngFileName)
                 .path(imgPath)
                 .build();
 
-        //저장
+        // 저장
         imageRepository.save(image);
 
-        //로컬에 생성된 파일 삭제
+        // 로컬에 생성된 파일 삭제
         pngFile.delete();
 
         return image;
-
     }
 
 //    @Transactional
@@ -168,6 +170,24 @@ public class ImageService {
         }
 
         return convertedFile;
+    }
+
+    public void optimizePngFile(File pngFile) throws IOException {
+        // OptiPNG 명령어 실행
+        ProcessBuilder processBuilder = new ProcessBuilder("optipng", pngFile.getAbsolutePath());
+        Process process = processBuilder.start();
+
+        try {
+            // OptiPNG 프로세스가 완료될 때까지 대기
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new IOException("OptiPNG optimization failed with exit code " + exitCode);
+            }
+        } catch (InterruptedException e) {
+            // 중단 상태 복구
+            Thread.currentThread().interrupt();
+            throw new IOException("Optimization interrupted", e);
+        }
     }
 
     @Transactional
