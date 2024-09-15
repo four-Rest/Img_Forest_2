@@ -45,7 +45,7 @@ public class ImageService {
         File file = convertMultipartFileToFile(multipartFile);
 
 
-        //Object storage에 업로드
+        //S3에 업로드
         try {
             String fullPath = imgPath + fileName;
             s3.putObject(new PutObjectRequest(s3Util.getBucketName(), imgPath + fileName, file));
@@ -162,7 +162,7 @@ public class ImageService {
         File file = convertMultipartFileToFile(multipartFile);
 
 
-        //Object storage에 업로드
+        //S3에 업로드
         try {
             s3.putObject(new PutObjectRequest(s3Util.getBucketName(), newFilePath + newFileName, file)
                     .withCannedAcl(CannedAccessControlList.PublicRead));
