@@ -95,16 +95,17 @@ public class ArticleController {
     //tag값으로 글 검색
     @GetMapping("/{tagName}")
     @Operation(summary = "Tag값으로 글 검색", description = "Tag값으로 글 검색 시 사용하는 API")
-    public GlobalResponse searchArticlesByTag(@PathVariable("tagName") String tagName) {
-        if (tagService.getArticlesByTagName(tagName) == null) {
+    public GlobalResponse searchArticlesByTag(@RequestParam(value = "pageNo", defaultValue = "0") int pageNo,
+                                              @RequestParam(value = "tagName", required = false) String tagName) {
+        Page<ArticleListResponseDto> result;
 
-            return GlobalResponse.of("204", "no data");
+        if(tagName != null) {
+            result = articleService.searchAllPagingByTag(pageNo,tagName);
         }
-        Set<ArticleListResponseDto> articleListResponseDtoSet = tagService.getArticlesByTagName(tagName)
-                .stream()
-                .map(article -> new ArticleListResponseDto(article))
-                .collect(Collectors.toSet());
-        return GlobalResponse.of("200", "success", articleListResponseDtoSet);
+        else {
+            result = articleService.searchAllPaging(pageNo);
+        }
+        return GlobalResponse.of("200","success", result);
     }
 
     // 글 생성
