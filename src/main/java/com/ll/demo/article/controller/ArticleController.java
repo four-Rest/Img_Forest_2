@@ -92,7 +92,7 @@ public class ArticleController {
         return GlobalResponse.of("200", "success", articleDetailResponseDto);
     }
 
-    //tag값으로 글 검색
+    //tag값으로 검색
     @GetMapping("/{tagName}")
     @Operation(summary = "Tag값으로 글 검색", description = "Tag값으로 글 검색 시 사용하는 API")
     public GlobalResponse searchArticlesByTag(@RequestParam(value = "pageNo", defaultValue = "0") int pageNo,
