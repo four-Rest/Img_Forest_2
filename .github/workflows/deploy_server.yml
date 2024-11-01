@@ -32,7 +32,7 @@ jobs:
           draft: false
           prerelease: false
 
-      # Tag 이름을 환경 파일에 저장
+      # 태그 이름을 환경 파일에 저장
       - name: Save tag name
         run: echo "TAG_NAME=${{ steps.create_tag.outputs.new_tag }}" >> $GITHUB_ENV
 
@@ -50,11 +50,9 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.ACCESS_GITHUB_TOKEN }}
-      - name: set lower case owner name
+      - name: Set lower case owner name
         run: |
-          echo "OWNER_LC=${OWNER,,}" >> ${GITHUB_ENV}
-        env:
-          OWNER: '${{ github.repository_owner }}'
+          echo "OWNER_LC=${{ github.repository_owner }}".lower() >> $GITHUB_ENV
       - name: application-secret.yml 생성
         env:
           ACTIONS_STEP_DEBUG: true
@@ -68,3 +66,7 @@ jobs:
           tags: |
             ghcr.io/${{ env.OWNER_LC }}/imgforest-server-app:${{ env.TAG_NAME }},
             ghcr.io/${{ env.OWNER_LC }}/imgforest-server-app:latest
+
+      - name: Debug TAG_NAME
+        run: |
+          echo "TAG_NAME: ${{ env.TAG_NAME }}"
