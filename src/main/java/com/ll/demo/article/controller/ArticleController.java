@@ -99,7 +99,7 @@ public class ArticleController {
                                               @RequestParam(value = "tagName", required = false) String tagName) {
         Page<ArticleListResponseDto> result;
 
-        if(tagName.isEmpty()) {
+        if(!tagName.isEmpty()) {
             result = articleService.searchAllPagingByTag(pageNo,tagName);
         }
         else {
