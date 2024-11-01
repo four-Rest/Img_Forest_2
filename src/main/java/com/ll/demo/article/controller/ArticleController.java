@@ -99,7 +99,7 @@ public class ArticleController {
                                               @RequestParam(value = "tagName", required = false) String tagName) {
         Page<ArticleListResponseDto> result;
 
-        if(tagName != null) {
+        if(tagName == null) {
             result = articleService.searchAllPagingByTag(pageNo,tagName);
         }
         else {
