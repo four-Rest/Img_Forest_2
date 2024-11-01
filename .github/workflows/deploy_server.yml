@@ -51,8 +51,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.ACCESS_GITHUB_TOKEN }}
       - name: Set lower case owner name
-        run: |
-          echo "OWNER_LC=${{ github.repository_owner }}".lower() >> $GITHUB_ENV
+        run: echo "OWNER_LC=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
       - name: application-secret.yml 생성
         env:
           ACTIONS_STEP_DEBUG: true
@@ -66,7 +65,3 @@ jobs:
           tags: |
             ghcr.io/${{ env.OWNER_LC }}/imgforest-server-app:${{ env.TAG_NAME }},
             ghcr.io/${{ env.OWNER_LC }}/imgforest-server-app:latest
-
-      - name: Debug TAG_NAME
-        run: |
-          echo "TAG_NAME: ${{ env.TAG_NAME }}"
