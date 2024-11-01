@@ -6,15 +6,12 @@ on:
       - 'src/**'
       - 'build.gradle'
       - 'Dockerfile'
-
-
     branches:
       - deploy_patch
+
 jobs:
   makeTagAndRelease:
     runs-on: ubuntu-latest
-    outputs:
-      tag_name: ${{ steps.create_tag.outputs.new_tag }}
     steps:
       - uses: actions/checkout@v4
       - name: Create Tag
@@ -34,6 +31,11 @@ jobs:
           body: ${{ steps.create_tag.outputs.changelog }}
           draft: false
           prerelease: false
+
+      # Tag 이름을 환경 파일에 저장
+      - name: Save tag name
+        run: echo "TAG_NAME=${{ steps.create_tag.outputs.new_tag }}" >> $GITHUB_ENV
+
   buildImageAndPush:
     name: 도커 이미지 빌드와 푸시
     needs: makeTagAndRelease
@@ -64,5 +66,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ env.OWNER_LC }}/imgforest-server-app:${{ needs.makeTagAndRelease.outputs.tag_name }},
+            ghcr.io/${{ env.OWNER_LC }}/imgforest-server-app:${{ env.TAG_NAME }},
             ghcr.io/${{ env.OWNER_LC }}/imgforest-server-app:latest
