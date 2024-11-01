@@ -8,10 +8,11 @@ on:
       - 'Dockerfile'
     branches:
       - deploy_patch
-
 jobs:
   makeTagAndRelease:
     runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.create_tag.outputs.new_tag }}
     steps:
       - uses: actions/checkout@v4
       - name: Create Tag
@@ -31,11 +32,6 @@ jobs:
           body: ${{ steps.create_tag.outputs.changelog }}
           draft: false
           prerelease: false
-
-      # 태그 이름을 환경 파일에 저장
-      - name: Save tag name
-        run: echo "TAG_NAME=${{ steps.create_tag.outputs.new_tag }}" >> $GITHUB_ENV
-
   buildImageAndPush:
     name: 도커 이미지 빌드와 푸시
     needs: makeTagAndRelease
@@ -50,8 +46,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.ACCESS_GITHUB_TOKEN }}
-      - name: Set lower case owner name
-        run: echo "OWNER_LC=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      - name: set lower case owner name
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >> ${GITHUB_ENV}
+        env:
+          OWNER: '${{ github.repository_owner }}'
       - name: application-secret.yml 생성
         env:
           ACTIONS_STEP_DEBUG: true
@@ -63,5 +62,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ env.OWNER_LC }}/imgforest-server-app:${{ env.TAG_NAME }},
+            ghcr.io/${{ env.OWNER_LC }}/imgforest-server-app:${{ needs.makeTagAndRelease.outputs.tag_name }},
             ghcr.io/${{ env.OWNER_LC }}/imgforest-server-app:latest
