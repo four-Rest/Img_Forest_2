@@ -43,6 +43,3 @@ custom:
     cookieDomain: "${custom.prod.cookieDomain}"
     frontUrl: "${custom.prod.frontUrl}"
     backUrl: "${custom.prod.backUrl}"
-test:
-  user:
-    password: a5sdf45asd

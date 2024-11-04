@@ -28,8 +28,6 @@ import java.util.Arrays;
 @Configuration
 public class ImgTestDataConfig {
 
-    @Value("${test.user.password}")
-    private String password;
 
     @Bean
     public ApplicationRunner initImgTestData(
@@ -45,8 +43,8 @@ public class ImgTestDataConfig {
             //테스트용 사용자 생성
             MemberCreateRequestDto memberCreateRequestDto = new MemberCreateRequestDto();
             memberCreateRequestDto.setUsername("testUserForImgTest");
-            memberCreateRequestDto.setPassword1(password);
-            memberCreateRequestDto.setPassword2(password);
+            memberCreateRequestDto.setPassword1("asd5f4asd54f");
+            memberCreateRequestDto.setPassword2("asd5f4asd54f");
             memberCreateRequestDto.setEmail("test@email.email");
             memberCreateRequestDto.setNickname("testUserForImgTest");
             memberService.signup(memberCreateRequestDto);
