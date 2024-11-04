@@ -115,7 +115,7 @@ public class ArticleController {
     public GlobalResponse createArticle(
             @Valid ArticleRequestDto articleRequestDto,
             Principal principal) throws IOException {
-        // 사용자 인증 정보 가져오기
+        // 사용자 확인
         Member member = memberService.findByUsername(principal.getName());
 
         if (member == null) {
