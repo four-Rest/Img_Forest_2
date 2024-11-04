@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,9 +21,18 @@ public class ArticleTagService {
     private final TagService tagService;
 
     @Transactional
+    public ArticleTag create(Article article, Tag tag) {
+        ArticleTag articleTag = new ArticleTag();
+        articleTag.setArticle(article);
+        articleTag.setTag(tag);
+        articleTagRepository.save(articleTag);
+        return articleTag;
+    }
+
+    @Transactional
     public void update(Article article, String[] tagArray) {
         Set<Tag> newTags = tagService.toTagSet(tagArray);
-        //이미 tag가 있는 경우
+        //article에 이미 tag가 있는 경우
         if (article.getArticleTags() != null) {
             Set<Tag> oldTags = article.getArticleTags()
                     .stream()
@@ -40,13 +50,21 @@ public class ArticleTagService {
             for (Tag newTag : newTags) {
                 //새 태그가 기존 태그 set에 없으면 추가
                 if (!oldTags.contains(newTag)) {
-                    ArticleTag articleTag = ArticleTag.builder()
-                            .article(article)
-                            .tag(newTag)
-                            .build();
-                    articleTagRepository.save(articleTag);
+                    create(article, newTag);
                 }
             }
+
+            article.setArticleTags(articleTagRepository.findByArticle(article));
+        }
+
+        //tag가 없는 article이거나 새로 생성되는 article인 경우
+        else {
+            Set<Tag> tags = tagService.toTagSet(tagArray);
+            Set<ArticleTag> articleTags = new HashSet<>();
+            for (Tag tag : tags) {
+                articleTags.add(create(article, tag));
+            }
+            article.setArticleTags(articleTags);
         }
     }
 

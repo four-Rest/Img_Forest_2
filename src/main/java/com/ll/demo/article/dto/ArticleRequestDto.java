@@ -18,8 +18,15 @@ import java.util.Set;
 @Validated
 public class ArticleRequestDto {
     private String content;
+    private String tagString;
     private String[] tagArray;
     private MultipartFile multipartFile;
     private Long price;
     private boolean paid;
+
+    public void parseTags() {
+        if (tagString != null && !tagString.isEmpty()) {
+            this.tagArray = tagString.split(",");
+        }
+    }
 }

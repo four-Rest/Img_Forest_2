@@ -8,5 +8,11 @@ import lombok.Setter;
 public class ArticleRequestDtoMode2 {
     private String content;
     private String[] tagArray;
+    private String tagString;
 
+    public void parseTags() {
+        if (tagString != null && !tagString.isEmpty()) {
+            this.tagArray = tagString.split(",");
+        }
+    }
 }
