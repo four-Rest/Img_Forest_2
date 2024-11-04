@@ -45,4 +45,4 @@ custom:
     backUrl: "${custom.prod.backUrl}"
 test:
   user:
-    password: ${test.user.password}
+    password: a5sdf45asd
