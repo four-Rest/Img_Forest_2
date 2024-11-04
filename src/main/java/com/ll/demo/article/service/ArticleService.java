@@ -54,7 +54,7 @@ public class ArticleService {
         Article article = Article.builder()
                 .content(articleRequestDto.getContent())
                 .member(member)
-                .price(articleRequestDto.getPrice() == 0? null : articleRequestDto.getPrice())
+                .price(articleRequestDto.getPrice() == null || articleRequestDto.getPrice() == 0? null : articleRequestDto.getPrice())
                 .paid(articleRequestDto.isPaid())
                 .likes(0)
                 .build();
