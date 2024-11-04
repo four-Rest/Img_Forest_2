@@ -61,7 +61,6 @@ public class ArticleService {
         articleRequestDto.parseTags();
         String[] tagArray = articleRequestDto.getTagArray();
         if (tagArray != null) {
-            System.out.println("+++++++++++++++++++++++++++++tagArray 존재함++++++++++++++++++++++++++++");
             articleTagService.update(article, tagArray);
         }
         Image image = imageService.create(article, articleRequestDto.getMultipartFile());
@@ -164,15 +163,11 @@ public class ArticleService {
         sorts.add(Sort.Order.desc("likes"));
         Pageable pageable = PageRequest.of(pageNo,10, Sort.by(sorts));
 
-        System.out.println("loading all tags");
-
         return articleRepository.findAll(pageable).map(article -> new ArticleListResponseDto(article));
     }
 
     // 태그 게시물 페이징
     public Page<ArticleListResponseDto> searchAllPagingByTag(int pageNo, String tagName) {
-
-        System.out.println("searching tag");
 
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("likes"));
@@ -180,10 +175,8 @@ public class ArticleService {
         Optional<Tag>  opTag = tagRepository.findByTagName(tagName);
 
         if(opTag.isEmpty()) {
-            System.out.println("tag not exists");
             return articleRepository.findAll(pageable).map(article -> new ArticleListResponseDto(article));
         }
-        System.out.println("tag found");
         return articleRepository.findByArticleTagsTag(opTag.get(), pageable).map(article -> new ArticleListResponseDto(article));
 
     }

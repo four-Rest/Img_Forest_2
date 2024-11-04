@@ -100,11 +100,9 @@ public class ArticleController {
         Page<ArticleListResponseDto> result;
 
         if(tagName == null) {
-            System.out.println("tagname null");
             result = articleService.searchAllPaging(pageNo);
         }
         else {
-            System.out.println("tagname" + tagName);
             result = articleService.searchAllPagingByTag(pageNo,tagName);
         }
         return GlobalResponse.of("200","success", result);
@@ -244,8 +242,6 @@ public class ArticleController {
             @RequestParam(value = "userNick", required = false) String nick
     ) {
         Page<ArticleListResponseDto> result;
-
-        System.out.println("nick is" + nick);
 
         if(tagName == null) {
             result = articleService.searchAllPaging(pageNo);
