@@ -11,7 +11,7 @@ public class SystemService {
     private final MemberRepository memberRepository;
     private final ArticleRepository articleRepository;
     public boolean testDataCreated() {
-        return memberRepository.findByUsername("testUserForImgTest").isPresent() && articleRepository.findByMemberUsername("testUserForImgTest").size() >= 15;
+        return memberRepository.findByUsername("testUserForImgTest").isPresent() && articleRepository.findByMemberUsername("testUserForImgTest").size() >= 10;
     }
 
 }
