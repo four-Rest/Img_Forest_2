@@ -36,9 +36,10 @@ public class CommentController {
     private final CommentService commentService;
     private final MemberService memberService;
 
-    @PostMapping("/")
+    @PostMapping("")
     @Operation(summary = "댓글 생성", description = "댓글 생성 시 사용하는 API")
     public GlobalResponse<CreateCommentResponse> create(@Valid @RequestBody CreateCommentRequest createCommentRequest) {
+        System.out.println("data recieved");
         return GlobalResponse.of("201", "success", this.commentService.create(createCommentRequest));
     }
 

@@ -43,7 +43,7 @@ public class ArticleDetailResponseDto {
                 .stream()
                 .map(articleTag -> articleTag.getTag().getTagName())
                 .collect(Collectors.toSet());
-        this.imgFilePath = article.getImage().getPath().substring(article.getImage().getPath().length()-10);
+        this.imgFilePath = article.getImage().getPath().substring(article.getImage().getPath().length()-11, article.getImage().getPath().length()-1);
         this.imgFileName = article.getImage().getFileName();
 
         this.listCommentResponses = article.getCommentList().stream()

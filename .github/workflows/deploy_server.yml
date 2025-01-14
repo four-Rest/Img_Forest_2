@@ -6,10 +6,8 @@ on:
       - 'src/**'
       - 'build.gradle'
       - 'Dockerfile'
-
-
     branches:
-      - main
+      - deploy_patch
 jobs:
   makeTagAndRelease:
     runs-on: ubuntu-latest

@@ -11,6 +11,7 @@ import com.ll.demo.global.service.SystemService;
 import com.ll.demo.member.dto.MemberCreateRequestDto;
 import com.ll.demo.member.entity.Member;
 import com.ll.demo.member.service.MemberService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,7 @@ import java.util.Arrays;
 @Configuration
 public class ImgTestDataConfig {
 
+
     @Bean
     public ApplicationRunner initImgTestData(
             SystemService systemService,
@@ -41,14 +43,13 @@ public class ImgTestDataConfig {
             //테스트용 사용자 생성
             MemberCreateRequestDto memberCreateRequestDto = new MemberCreateRequestDto();
             memberCreateRequestDto.setUsername("testUserForImgTest");
-            memberCreateRequestDto.setPassword1("1234");
-            memberCreateRequestDto.setPassword2("1234");
+            memberCreateRequestDto.setPassword1("asd5f4asd54f");
+            memberCreateRequestDto.setPassword2("asd5f4asd54f");
             memberCreateRequestDto.setEmail("test@email.email");
             memberCreateRequestDto.setNickname("testUserForImgTest");
             memberService.signup(memberCreateRequestDto);
 
 
-            //테스트데이터 사용자생성
             Member member = memberService.findByUsername("testUserForImgTest");
 
             //이미지파일 이름 설정

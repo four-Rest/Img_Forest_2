@@ -18,8 +18,7 @@ spring:
     aws:
       ${spring.profiles.include}.accessKey: ${cloud.aws.accessKey}
       ${spring.profiles.include}.secretKey: ${cloud.aws.secretKey}
-      regionName: kr-standard
-      bucketName: img-forest-image-prod
+      bucketName: imgforestprod
   data:
     redis:
       host: "172.17.0.1"

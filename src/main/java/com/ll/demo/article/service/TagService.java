@@ -27,9 +27,12 @@ public class TagService {
 
     public Set<Tag> toTagSet(String[] tagArray) {
         Set<Tag> tags = new HashSet<>();
+        if (tagArray == null) {
+            return tags;
+        }
         for (String tagName : tagArray) {
-            if (tagRepository.findByTagName(tagName) != null) {
-                tags.add(tagRepository.findByTagName(tagName));
+            if (tagRepository.findByTagName(tagName).isPresent()) {
+                tags.add(tagRepository.findByTagName(tagName).get());
             } else {
                 tags.add(create(tagName));
             }
@@ -38,11 +41,11 @@ public class TagService {
     }
 
     public Set<Article> getArticlesByTagName(String tagName) {
-        Tag tag = tagRepository.findByTagName(tagName);
-        if (tag == null) {
+        Optional<Tag> opTag = tagRepository.findByTagName(tagName);
+        if (opTag.isEmpty()) {
             return null;
         }
-        Set<Article> articles = tag.getArticleTags()
+        Set<Article> articles = opTag.get().getArticleTags()
                 .stream()
                 .map(articleTag -> articleTag.getArticle())
                 .collect(Collectors.toSet());

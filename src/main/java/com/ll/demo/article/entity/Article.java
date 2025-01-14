@@ -45,6 +45,7 @@ public class Article extends BaseEntity {
     @OneToOne(mappedBy = "article", cascade = CascadeType.REMOVE)
     private Image image;
 
+    @Setter
     @OneToMany(mappedBy = "article", cascade = CascadeType.REMOVE)
     private Set<ArticleTag> articleTags;
 

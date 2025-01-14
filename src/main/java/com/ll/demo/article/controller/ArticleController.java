@@ -92,19 +92,20 @@ public class ArticleController {
         return GlobalResponse.of("200", "success", articleDetailResponseDto);
     }
 
-    //tag값으로 글 검색
+    //tag값으로 검색
     @GetMapping("/{tagName}")
     @Operation(summary = "Tag값으로 글 검색", description = "Tag값으로 글 검색 시 사용하는 API")
-    public GlobalResponse searchArticlesByTag(@PathVariable("tagName") String tagName) {
-        if (tagService.getArticlesByTagName(tagName) == null) {
+    public GlobalResponse searchArticlesByTag(@RequestParam(value = "pageNo", defaultValue = "0") int pageNo,
+                                              @RequestParam(value = "tagName", required = false) String tagName) {
+        Page<ArticleListResponseDto> result;
 
-            return GlobalResponse.of("204", "no data");
+        if(tagName == null) {
+            result = articleService.searchAllPaging(pageNo);
         }
-        Set<ArticleListResponseDto> articleListResponseDtoSet = tagService.getArticlesByTagName(tagName)
-                .stream()
-                .map(article -> new ArticleListResponseDto(article))
-                .collect(Collectors.toSet());
-        return GlobalResponse.of("200", "success", articleListResponseDtoSet);
+        else {
+            result = articleService.searchAllPagingByTag(pageNo,tagName);
+        }
+        return GlobalResponse.of("200","success", result);
     }
 
     // 글 생성
@@ -114,7 +115,7 @@ public class ArticleController {
     public GlobalResponse createArticle(
             @Valid ArticleRequestDto articleRequestDto,
             Principal principal) throws IOException {
-        // 사용자 인증 정보 가져오기
+        // 사용자 확인
         Member member = memberService.findByUsername(principal.getName());
 
         if (member == null) {
@@ -242,16 +243,14 @@ public class ArticleController {
     ) {
         Page<ArticleListResponseDto> result;
 
-        System.out.println("nick is" + nick);
-
-        if(tagName != null) {
-            result = articleService.searchAllPagingByTag(pageNo,tagName);
-        }
-        else if(nick != null) {
-            result = articleService.searchAllPagingByUser(pageNo,nick);
-        }
-        else {
+        if(tagName == null) {
             result = articleService.searchAllPaging(pageNo);
+        }
+//        else if(nick != null) {
+//            result = articleService.searchAllPagingByUser(pageNo,nick);
+//        }
+        else {
+            result = articleService.searchAllPagingByTag(pageNo,tagName);
         }
         return GlobalResponse.of("200","success", result);
     }
